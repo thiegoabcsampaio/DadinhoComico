@@ -127,3 +127,6 @@ DadinhoComico/
 - Espectador.glb: materiais Esp_Pele/Esp_Roupa/Esp_Cabelo para recolorir por instancia;
   acessorios como malhas separadas (Acc_Plaquinha, Acc_Frufru, Acc_Oculos, Acc_Bone) para
   ligar/desligar por espectador; animacoes em loop Idle, Aplaudir, LevantarPlaquinha, AgitarFrufru
+- Sons de plateia (Assets/Audio/SFX/Plateia_*.wav): Murmurio toca em loop a partida
+  inteira (loop ligado no .import), Ooh no Desconfio, Aplauso na revelacao e Festa no
+  castigo; todos sintetizados por tools/GerarSfx.tscn

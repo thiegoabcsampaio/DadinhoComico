@@ -126,3 +126,5 @@ Cole este bloco no inicio da proxima sessao.
 - Acessorios: plaquinha, frufru, oculos, bone - ou nenhum
 - Reacoes: murmurio na aposta, silencio no Desconfio, aplauso na revelacao,
   festa (plaquinhas e frufrus) no castigo e no fim de jogo
+- A plateia tem som: murmurio de fundo continuo, que abaixa no Desconfio e da lugar a
+  um "oooh" de expectativa, aplauso na revelacao e festa com assobios no castigo

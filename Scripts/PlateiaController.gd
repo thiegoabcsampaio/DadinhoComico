@@ -13,6 +13,12 @@ extends Node3D
 
 const CENA_ARQUIBANCADA := preload("res://Assets/Models/Arquibancada.glb")
 const CENA_ESPECTADOR := preload("res://Assets/Models/Espectador.glb")
+## Murmúrio de fundo: toca a partida inteira, em loop, bem baixo.
+const MURMURIO := preload("res://Assets/Audio/SFX/Plateia_Murmurio.wav")
+
+## Volume do murmúrio quando a plateia está solta e quando prende a respiração.
+const VOLUME_MURMURIO := -26.0
+const VOLUME_MURMURIO_TENSO := -38.0
 
 ## Nomes dos materiais do .glb que podem ser recoloridos por instância.
 const MAT_PELE := "Esp_Pele"
@@ -65,6 +71,8 @@ const CABELOS: Array[Color] = [
 ## Todos os espectadores criados (AnimationPlayer + acessório de cada um).
 var _espectadores: Array[Dictionary] = []
 var _rng := RandomNumberGenerator.new()
+var _murmurio: AudioStreamPlayer
+var _tween_murmurio: Tween
 
 
 func _ready() -> void:
@@ -73,6 +81,11 @@ func _ready() -> void:
 	else:
 		_rng.randomize()
 	_montar()
+	_murmurio = AudioStreamPlayer.new()
+	_murmurio.stream = MURMURIO
+	_murmurio.volume_db = VOLUME_MURMURIO
+	add_child(_murmurio)
+	_murmurio.play()
 
 
 ## Liga a plateia aos sinais da partida. Chamado por Main.
@@ -180,15 +193,30 @@ func _murmurar() -> void:
 			_tocar(espectador, "Idle")
 
 
-## Desconfio: todo mundo para para ver no que dá.
+## Desconfio: todo mundo para para ver no que dá. O murmúrio abaixa e sobra
+## um "oooh" de expectativa.
 func _silenciar() -> void:
 	for espectador in _espectadores:
 		_tocar(espectador, "Idle")
+	_volume_murmurio(VOLUME_MURMURIO_TENSO, 0.3)
+	Sfx.tocar("Plateia_Ooh", -12.0)
 
 
 func _aplaudir() -> void:
 	for espectador in _espectadores:
 		_tocar(espectador, "Aplaudir")
+	_volume_murmurio(VOLUME_MURMURIO, 0.6)
+	Sfx.tocar("Plateia_Aplauso", -10.0)
+
+
+## O murmúrio nunca corta seco: sobe e desce junto com a tensão da mesa.
+func _volume_murmurio(alvo: float, duracao: float) -> void:
+	if _murmurio == null:
+		return
+	if _tween_murmurio != null and _tween_murmurio.is_valid():
+		_tween_murmurio.kill()
+	_tween_murmurio = create_tween()
+	_tween_murmurio.tween_property(_murmurio, "volume_db", alvo, duracao)
 
 
 ## Castigo e fim de jogo: quem tem plaquinha levanta, quem tem frufru agita,
@@ -197,3 +225,5 @@ func _festejar() -> void:
 	for espectador in _espectadores:
 		var festa: String = espectador["festa"]
 		_tocar(espectador, festa if festa != "" else "Aplaudir")
+	_volume_murmurio(VOLUME_MURMURIO, 0.5)
+	Sfx.tocar("Plateia_Festa", -8.0)
