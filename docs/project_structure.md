@@ -46,7 +46,7 @@ DadinhoComico/
 │   │   │   ├── Castigo_Torta.ogg
 │   │   │   └── Castigo_Choque.ogg
 │   │   └── Music/
-│   │       └── Tema_Menu.ogg
+│   │       └── Tema_Menu.wav
 │   └── UI/
 │       ├── Balao_Dialogo.png
 │       ├── Botao_Dudo.png
