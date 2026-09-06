@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="NpcProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/NpcProfile.gd" id="1_perfil"]
+
+[resource]
+script = ExtResource("1_perfil")
+nome = "Apresentadora"
+chave_dialogo = "apresentadora"
+agressividade = 0.7
+cautela = 0.3
+frequencia_tells = 0.6

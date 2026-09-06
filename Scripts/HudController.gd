@@ -165,13 +165,16 @@ func _ao_mudar_turno(jogador_id: int) -> void:
 		_label_status.text = DialogueLoader.get_fmt("ui", "vez_de", [_jogo.nome(jogador_id)])
 
 
+## Balões genéricos só para o humano; NPCs falam via Main.gd + dialogues.json.
 func _ao_apostar(aposta: BetValidator.Aposta) -> void:
-	mostrar_balao(aposta.jogador, str(aposta))
+	if aposta.jogador == _humano:
+		mostrar_balao(aposta.jogador, str(aposta))
 	_atualizar_info()
 
 
 func _ao_declarar_dudo(acusador: int, _acusado: int) -> void:
-	mostrar_balao(acusador, _t("dudo"))
+	if acusador == _humano:
+		mostrar_balao(acusador, _t("dudo"))
 
 
 func _ao_resolver_dudo(r: BetValidator.ResultadoDudo) -> void:

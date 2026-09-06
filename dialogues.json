@@ -1,5 +1,6 @@
 {
 	"ui": {
+		"nome_jogador": "Você",
 		"sua_vez": "Sua vez!",
 		"vez_de": "Vez de %s...",
 		"dudo": "DUDO!",
@@ -19,5 +20,117 @@
 		"titulo_face": "Face",
 		"titulo_seus_dados": "Seus dados",
 		"info_inicial": "Rodada -"
+	},
+
+	"apresentadora": {
+		"apostas": [
+			"Baixinhos, eu digo {aposta}! Quem acredita levanta a mão!",
+			"Olha só: {aposta}! Eu sinto que a sorte tá do meu lado hoje!",
+			"{aposta}, baixinhos! Confia na tia!",
+			"Vamos animar essa mesa: {aposta}!"
+		],
+		"insultos": [
+			"Ai, {nome}, mentira tem perna curta, baixinho! Dudo!",
+			"Dudo! A tia percebe quando um baixinho tá inventando história!",
+			"Isso não vale, {nome}! Dudo, dudo, dudo!"
+		],
+		"defesas": [
+			"Eu? Mentindo? A tia nunca mentiria pros baixinhos!",
+			"Calma, {nome}, abre o copinho e confere!",
+			"Ih, {nome}, você vai se arrepender dessa!"
+		],
+		"reacoes": [
+			"Ai, que pena! Mas a tia não desanima, não!",
+			"Um dadinho a menos... mas o show tem que continuar!",
+			"Poxa, baixinhos! Isso não foi legal!"
+		],
+		"castigos": [
+			"Tchau, baixinhos! A nave espacial da tia tá me esperando!",
+			"Hora de ir embora... beijinho, beijinho, tchau, tchau!"
+		]
+	},
+
+	"bruxa": {
+		"apostas": [
+			"Ocê vai ver, meu bem: {aposta}, e eu num minto pra ninguém!",
+			"Bebi minha poção e digo com precisão: {aposta}!",
+			"{aposta}, sô! Duvida? Pois num duvide, não!",
+			"Vixe, minha bola de cristal falou: {aposta}!"
+		],
+		"insultos": [
+			"Dudo, {nome}! Mentira de jacaré eu farejo de longe!",
+			"Ocê tá mentindo, e eu vou provar: dudo, viu!",
+			"Rima pra ocê, {nome}: quem mente, se arrepende! Dudo!"
+		],
+		"defesas": [
+			"Eu, mentindo? Cruz-credo, {nome}!",
+			"Abre o copo, {nome}, e depois num vem chorar!",
+			"Ocê vai engolir essa acusação junto com minha poção!"
+		],
+		"reacoes": [
+			"Ai, sô... perdi um dadinho, mas num perdi a esperança!",
+			"Maldição! Essa mesa tá enfeitiçada contra mim!",
+			"Uai... vou precisar de mais poção pra próxima!"
+		],
+		"castigos": [
+			"Num acredito, sô! Minha própria poção virou contra mim!",
+			"Vou embora, mas deixo uma praga nessa mesa: quem rir, perde!"
+		]
+	},
+
+	"heroi": {
+		"apostas": [
+			"{aposta}! Não contavam com a minha aritmética!",
+			"Como diz o ditado: quem aposta cedo, dado ajuda. {aposta}!",
+			"{aposta}! Minhas anteninhas de vinil nunca falham!",
+			"Mais vale um dado na mão do que dois voando: {aposta}!"
+		],
+		"insultos": [
+			"Suspeitei desde o primeiro dado, {nome}! Dudo!",
+			"Dudo! Meu martelo biônico detecta mentiras a quilômetros!",
+			"Como diz o ditado: quem mente uma vez, cai do cavalo! Dudo, {nome}!"
+		],
+		"defesas": [
+			"Calma, {nome}, calma! Que não cunda o pânico!",
+			"Eu? Mentir? Um herói jamais... quase nunca... às vezes!",
+			"Abre o copo, {nome}, e verá a verdade nua e crua... e sem roupa!"
+		],
+		"reacoes": [
+			"Foi sem querer... perder o dado, digo.",
+			"Como diz o ditado: dado perdido, lição aprendida... ou algo assim.",
+			"Ai! Minhas anteninhas falharam dessa vez!"
+		],
+		"castigos": [
+			"Ninguém contava com a minha... pílula encolhedora! Socorro!",
+			"Eu volto! Menor, mas volto!"
+		]
+	},
+
+	"ciborgue": {
+		"apostas": [
+			"Probabilidade calculada. {aposta}.",
+			"{aposta}. Margem de erro: irrelevante.",
+			"Analisando... {aposta}. Resistência é inútil.",
+			"{aposta}. Meus sensores não mentem. Eu, talvez."
+		],
+		"insultos": [
+			"Hasta la vista, dadinho. Dudo, {nome}.",
+			"Dudo. Sua aposta viola três leis da estatística.",
+			"Detectada anomalia na sua história, {nome}. Dudo."
+		],
+		"defesas": [
+			"Acusação registrada. Resultado previsto: você perde, {nome}.",
+			"Meus cálculos não falham. Os seus, {nome}, aparentemente sim.",
+			"Negativo. Abra o copo e reinicie sua confiança."
+		],
+		"reacoes": [
+			"Dano estrutural: um dado. Recalculando...",
+			"Erro de arredondamento. Não vai se repetir.",
+			"Interessante. Humanos chamam isso de azar."
+		],
+		"castigos": [
+			"Curto-circuito... detectado... Eu vol-ta-rei... após... reboot.",
+			"Hasta la vista, mesa. Desligando."
+		]
 	}
 }
