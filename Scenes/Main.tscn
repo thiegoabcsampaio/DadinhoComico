@@ -5,7 +5,7 @@
 ; - GameManager: motor lógico (Etapa 2)
 ; - Camera3D estática com CameraSetup.gd
 ; - DirectionalLight3D simulando iluminação de estúdio de TV
-; - Mesa (placeholder) e Assentos com as cenas dos NPCs (Scenes/NPCs/)
+; - Mesa (Mesa.tscn) e Assentos com as cenas dos NPCs (Scenes/NPCs/)
 ; - HUD (CanvasLayer) com botões e balões de fala
 
 [ext_resource type="Script" path="res://Scripts/Main.gd" id="1_main"]
@@ -59,20 +59,24 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.1)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0.3)
 
 [node name="Apresentadora" parent="Assentos/Assento1" instance=ExtResource("6_apresentadora")]
+transform = Transform3D(-0.19612, 0, -0.98058, 0, 1, 0, 0.98058, 0, -0.19612, 0, 0, 0)
 
 [node name="Assento2" type="Marker3D" parent="Assentos"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0, -1)
 
 [node name="Bruxa" parent="Assentos/Assento2" instance=ExtResource("7_bruxa")]
+transform = Transform3D(0.85749, 0, -0.5145, 0, 1, 0, 0.5145, 0, 0.85749, 0, 0, 0)
 
 [node name="Assento3" type="Marker3D" parent="Assentos"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0, -1)
 
 [node name="Heroi" parent="Assentos/Assento3" instance=ExtResource("8_heroi")]
+transform = Transform3D(0.85749, 0, 0.5145, 0, 1, 0, -0.5145, 0, 0.85749, 0, 0, 0)
 
 [node name="Assento4" type="Marker3D" parent="Assentos"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0.3)
 
 [node name="Ciborgue" parent="Assentos/Assento4" instance=ExtResource("9_ciborgue")]
+transform = Transform3D(-0.19612, 0, 0.98058, 0, 1, 0, -0.98058, 0, -0.19612, 0, 0, 0)
 
 [node name="HUD" parent="." instance=ExtResource("5_hud")]

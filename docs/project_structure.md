@@ -28,6 +28,9 @@ DadinhoComico/
 │   │   ├── Bruxa.glb
 │   │   ├── Heroi.glb
 │   │   └── Ciborgue.glb
+│   ├── Source/
+│   │   ├── .gdignore            (Godot nao importa esta pasta)
+│   │   └── Personagens.blend    (fonte dos modelos; regenerado via Blender MCP)
 │   ├── Textures/
 │   │   ├── Mesa_Diffuse.png
 │   │   ├── Dado_Diffuse.png
@@ -78,6 +81,9 @@ DadinhoComico/
 ├── Addons/
 │   └── GodotMCP/
 │       └── [plugin MCP]
+├── tools/
+│   ├── Screenshot.tscn          (valida a camera fixa sem abrir o editor)
+│   └── Screenshot.gd
 └── docs/
     ├── system_prompt.md
     ├── game_bible.md
@@ -95,4 +101,6 @@ DadinhoComico/
 - Texturas: .png para diffuse, normal, roughness
 - Audio: .ogg (Godot nativo)
 - Todos os textos em dialogues.json na raiz, nunca hardcoded
-- Perfis de NPC como Resource (.tres) com campos: nome, agressividade, cautela, frequencia_tells
+- Perfis de NPC como Resource (.tres) com campos: nome, agressividade, cautela, frequencia_tells- Modelos 3D: materiais so com cor base (sem texturas) enquanto o estilo PS2 nao pedir; o .blend fonte fica em Assets/Source/
+- Personagens olham para +Z no proprio .glb; a rotacao para o centro da mesa fica no assento em Main.tscn
+- Escala: tampo da mesa a 0.75 m, cabeca dos NPCs a ~1.2 m, dados de 4 cm

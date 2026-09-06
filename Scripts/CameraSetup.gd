@@ -1,13 +1,14 @@
 extends Camera3D
 ## Câmera estática de estúdio de TV.
 ##
-## Fica acima da mesa, levemente inclinada para baixo (~45°).
+## Fica acima e atrás do assento do jogador, inclinada para baixo (~34°),
+## enquadrando o tampo (0.75 m) e os 4 NPCs sentados.
 ## Não recebe nenhum input do jogador e não executa nenhum movimento.
 
 # Posição fixa da câmera: acima e um pouco à frente da mesa.
-const CAMERA_POSITION := Vector3(0.0, 3.5, 3.5)
+const CAMERA_POSITION := Vector3(0.0, 2.3, 2.5)
 # Inclinação para baixo em aproximadamente 45°.
-const CAMERA_PITCH_DEGREES := -45.0
+const CAMERA_PITCH_DEGREES := -34.0
 
 
 func _ready() -> void:

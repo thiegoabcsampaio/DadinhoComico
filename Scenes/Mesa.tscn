@@ -1,13 +1,90 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
-; Cena da mesa (vazia por enquanto).
-; Placeholder: um BoxMesh simples representando a superfície da mesa.
+; Mesa de estúdio (Etapa 5): tampo oval 2.4 x 1.4 m, feltro a 0.755 m.
+; Um copo virado por assento (Copo0..4) com 3 dados escondidos embaixo.
+; A animação de levantar o copo na revelação fica para a Etapa 6.
 
-[sub_resource type="BoxMesh" id="BoxMesh_mesa"]
-size = Vector3(2.4, 0.12, 1.4)
+[ext_resource type="PackedScene" path="res://Assets/Models/Mesa.glb" id="1_mesa"]
+[ext_resource type="PackedScene" path="res://Assets/Models/Copo.glb" id="2_copo"]
+[ext_resource type="PackedScene" path="res://Assets/Models/Dado.glb" id="3_dado"]
 
 [node name="Mesa" type="Node3D"]
 
-[node name="Placeholder" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.06, 0)
-mesh = SubResource("BoxMesh_mesa")
+[node name="Modelo" parent="." instance=ExtResource("1_mesa")]
+
+[node name="Copos" type="Node3D" parent="."]
+
+[node name="Copo0" type="Node3D" parent="Copos"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.755, 0.45)
+
+[node name="Modelo" parent="Copos/Copo0" instance=ExtResource("2_copo")]
+transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0.12, 0)
+
+[node name="Dado0" parent="Copos/Copo0" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0, 0, -0.022)
+
+[node name="Dado1" parent="Copos/Copo0" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, -0.022, 0, 0.014)
+
+[node name="Dado2" parent="Copos/Copo0" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0.022, 0, 0.014)
+
+[node name="Copo1" type="Node3D" parent="Copos"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9, 0.755, 0.15)
+
+[node name="Modelo" parent="Copos/Copo1" instance=ExtResource("2_copo")]
+transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0.12, 0)
+
+[node name="Dado0" parent="Copos/Copo1" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0, 0, -0.022)
+
+[node name="Dado1" parent="Copos/Copo1" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, -0.022, 0, 0.014)
+
+[node name="Dado2" parent="Copos/Copo1" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0.022, 0, 0.014)
+
+[node name="Copo2" type="Node3D" parent="Copos"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.36, 0.755, -0.5)
+
+[node name="Modelo" parent="Copos/Copo2" instance=ExtResource("2_copo")]
+transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0.12, 0)
+
+[node name="Dado0" parent="Copos/Copo2" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0, 0, -0.022)
+
+[node name="Dado1" parent="Copos/Copo2" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, -0.022, 0, 0.014)
+
+[node name="Dado2" parent="Copos/Copo2" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0.022, 0, 0.014)
+
+[node name="Copo3" type="Node3D" parent="Copos"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.36, 0.755, -0.5)
+
+[node name="Modelo" parent="Copos/Copo3" instance=ExtResource("2_copo")]
+transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0.12, 0)
+
+[node name="Dado0" parent="Copos/Copo3" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0, 0, -0.022)
+
+[node name="Dado1" parent="Copos/Copo3" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, -0.022, 0, 0.014)
+
+[node name="Dado2" parent="Copos/Copo3" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0.022, 0, 0.014)
+
+[node name="Copo4" type="Node3D" parent="Copos"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 0.755, 0.15)
+
+[node name="Modelo" parent="Copos/Copo4" instance=ExtResource("2_copo")]
+transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0.12, 0)
+
+[node name="Dado0" parent="Copos/Copo4" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0, 0, -0.022)
+
+[node name="Dado1" parent="Copos/Copo4" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, -0.022, 0, 0.014)
+
+[node name="Dado2" parent="Copos/Copo4" instance=ExtResource("3_dado")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0.022, 0, 0.014)
