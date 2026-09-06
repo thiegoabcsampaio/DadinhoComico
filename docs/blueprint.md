@@ -1,4 +1,4 @@
-# BLUEPRINT — Liar's Dice (6 Etapas)
+# BLUEPRINT — Liar's Dice (7 Etapas)
 
 ## Roteamento por Etapa
 
@@ -142,3 +142,41 @@ Outputs esperados:
 - Animacoes embarcadas nos .glb dos NPCs
 
 Criterio de conclusao: jogo completo jogavel — rodadas, IA com personalidade, tells visiveis, castigos comicos com som
+---
+
+## Etapa 7 — Polimento Final e Ambientacao
+
+Agentes: [F] [B] para assets, [O] para integracao Godot
+
+Pre-requisito: Bloco B de docs/blueprint_melhorias.md concluido.
+
+Acoes:
+- Gerar via Blender MCP duas arquibancadas de estudio (esquerda e direita da
+  camera, fora da mesa) em .glb, low-poly
+- Gerar 1 modelo base de espectador sentado, extremamente otimizado
+  (< 600 tris), com 3 animacoes em loop: Aplaudir, LevantarPlaquinha,
+  AgitarFrufru; acessorios (plaquinha, frufru, oculos, bone) como malhas
+  separadas para ligar/desligar por instancia
+- Diversidade por codigo, nao por malha: paleta de tons de pele, cabelos e
+  roupas aplicada por instancia (material com albedo por instancia ou
+  MultiMeshInstance3D com custom_data / cor por instancia)
+- Godot: PlateiaController.gd popula as arquibancadas (~40 a 60 pessoas),
+  sorteia cor/acessorio/animacao com fase aleatoria e reage aos sinais do
+  GameManager (aposta = murmurio, Desconfio = "oooh", castigo = aplausos e
+  plaquinhas)
+- Pano de fundo de estudio (parede com luzes e logo do programa) no lugar do
+  ceu procedural
+- Trilha de menu (Assets/Audio/Music/Tema_Menu.ogg) e Menu.tscn
+- Ajustar o "Sua vez!" que encosta na base da mesa
+
+Outputs esperados:
+- Assets/Models/Arquibancada.glb
+- Assets/Models/Espectador.glb (com animacoes embarcadas)
+- Assets/Models/Estudio.glb
+- Scripts/PlateiaController.gd
+- Scenes/Plateia.tscn
+- Scenes/Menu.tscn
+- Assets/Audio/Music/Tema_Menu.ogg
+
+Criterio de conclusao: plateia diversa e animada visivel na camera fixa
+reagindo as jogadas, sem queda de FPS no export Web; menu inicial funcional

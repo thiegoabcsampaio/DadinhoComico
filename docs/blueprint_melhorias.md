@@ -1,0 +1,68 @@
+# BLUEPRINT DE MELHORIAS — Rodada 2 (pos-blueprint)
+
+Documento temporario. Cada item e riscado quando entra na main; quando
+todos estiverem prontos, este arquivo pode ser apagado (o que for permanente
+ja esta em blueprint.md, Etapa 7).
+
+Roteamento: [F] = Fable (Blender MCP e arquitetura), [O] = Opus (codigo Godot).
+Regra do revezamento: Fable primeiro (assets e docs), depois Opus (4 itens de
+codigo). Ao trocar de modelo, colar o PONTO DE RETOMADA da sessao anterior.
+
+---
+
+## Bloco A — Fable (fazer primeiro, exige Blender conectado)
+
+- [x] A1. Redesign do Ciborgue. O modelo atual parecia um pinguim (torso
+      esferico, braços curtos, roupa preta). Refazer como humanoide
+      cibernetico estilo Exterminador: ombros largos, torso reto, jaqueta,
+      calça jeans, braço direito de endoesqueleto, metade do rosto metalica
+      com olho vermelho. Regravar as 8 animacoes e reexportar Ciborgue.glb.
+- [x] A2. Nave da Apresentadora vira disco voador (UFO) de papelao: prato,
+      cupula, luzes na borda, pes. Exportar como Nave.glb (mesmo nome) e
+      ajustar PunishmentSystem._nave_de_papelao para pairar, puxar a
+      apresentadora num feixe e sumir girando.
+- [x] A3. blueprint.md: adicionar Etapa 7 (Polimento Final e Ambientacao).
+- [x] A4. Este documento e o bloco de retomada para o Opus.
+
+## Bloco B — Opus (codigo Godot, apos o Bloco A)
+
+- [ ] B1. Olhar para o jogador ao falar.
+      Gancho: Main._falar() -> hud.mostrar_balao(). DialogueLoader e uma
+      classe estatica sem sinais; o evento de fala e a chamada de _falar.
+      Implementar em NpcController: metodo olhar_para(alvo: Vector3, dur)
+      que gira SO o osso "head" (Skeleton3D.set_bone_pose_rotation ou um
+      SkeletonModifier3D LookAtModifier3D apontando o osso head) para a
+      camera, mantendo o Idle no corpo; voltar ao normal quando o balao
+      some (DURACAO_BALAO). Nao girar o no inteiro: o assento ja aponta
+      para a mesa e look_at() no no viraria o corpo de costas para a mesa.
+      Skeleton3D fica em Modelo/<Nome>_Armature/Skeleton3D.
+- [ ] B2. Troca de cadeiras a cada partida.
+      Gancho: Main._ready() monta PERFIS por assento (const). Trocar por
+      var perfis embaralhados (Array.shuffle()) e reparentar as instancias
+      NpcController para os Assento1..4 sorteados (o Assento0 e sempre o
+      humano). _ias, _controladores e as ancoras dos baloes devem usar o
+      mesmo sorteio. Manter a rotacao do assento (esta no no do NPC, em
+      Main.tscn: ao reparentar, copiar o transform do NPC que ocupava o
+      assento). Reiniciar partida ja recarrega a cena, entao o sorteio em
+      _ready basta.
+- [ ] B3. Zoom dos dados do jogador.
+      Gancho: HudController.ver_dados_alternado + MesaController.espiar().
+      Ao ligar Ver Dados: camera.unproject_position(Copo0.global_position)
+      da o ponto de tela do copo; criar 3 icones 2D (TextureRect ou Label
+      com a face) no CanvasLayer nesse ponto e tweenar posicao + escala ate
+      o PainelDados (%LabelMeusDados). Ao desligar, o caminho inverso.
+      O copo 3D continua inclinando (espiar) por baixo.
+- [ ] B4. Game feel do painel (HUD).
+      Botoes: mouse_entered/exited -> tween de scale 1.0 <-> 1.08 com
+      pivot_offset no centro; pressed -> Sfx.tocar("Clique") (gerar um
+      .wav curto novo em Assets/Audio/SFX, ou reaproveitar "Tell") e uma
+      CPUParticles2D one-shot de 8 particulas na posicao do botao.
+      Manter tudo em HudController; nenhum texto novo hardcoded.
+
+Criterio de conclusao do Bloco B: partida completa no F5 com NPCs olhando
+para a camera ao falar, assentos diferentes a cada Novo jogo, dados
+"voando" para o painel e botoes reagindo ao mouse.
+
+## Bloco C — Etapa 7 (Fable + Opus, ver blueprint.md)
+
+Depende do Bloco B pronto e validado.

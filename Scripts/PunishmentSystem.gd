@@ -30,23 +30,49 @@ func castigar(chave: String, alvo: Node3D) -> void:
 
 
 # ---------------------------------------------------------------- Apresentadora
-## Uma nave espacial de papelão desce, engole a apresentadora e decola.
+## Um disco voador de papelão desce, paira sobre a apresentadora, puxa ela
+## num feixe de luz e some girando.
 func _nave_de_papelao(alvo: Node3D) -> void:
 	Sfx.tocar("Castigo_Nave")
+	# A nave fica no pai do alvo para não encolher junto com ele.
+	var raiz: Node = alvo.get_parent() if alvo.get_parent() != null else alvo
 	var nave: Node3D = CENA_NAVE.instantiate()
-	alvo.add_child(nave)
-	nave.position = Vector3(0.0, 4.0, 0.0)
-	nave.scale = Vector3.ONE * 0.65
+	raiz.add_child(nave)
+	nave.global_position = alvo.global_position + Vector3(0.0, 5.0, 0.0)
+	nave.scale = Vector3.ONE * 0.7
 
+	# A nave paira logo acima da cabeça; o feixe vai do tampo até a nave.
+	const ALTURA_PAIRAR := 1.7
+	var feixe := MeshInstance3D.new()
+	var cil := CylinderMesh.new()
+	cil.top_radius = 0.28
+	cil.bottom_radius = 0.5
+	cil.height = ALTURA_PAIRAR - 0.5
+	cil.radial_segments = 12
+	feixe.mesh = cil
+	var mat_feixe := _material(Color(1.0, 0.95, 0.4, 0.4), 0.5, true)
+	mat_feixe.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	feixe.material_override = mat_feixe
+	raiz.add_child(feixe)
+	feixe.global_position = alvo.global_position + Vector3(0.0, 0.5 + cil.height * 0.5, 0.0)
+	feixe.scale = Vector3(1.0, 0.01, 1.0)
+
+	var altura_pairar := alvo.global_position.y + ALTURA_PAIRAR
 	var tween := create_tween()
-	tween.tween_property(nave, "position:y", 0.0, 0.9).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
-	tween.tween_interval(0.5)
-	# Decola girando; o personagem some dentro dela.
-	tween.tween_property(nave, "position:y", 6.0, 1.2).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_IN)
-	tween.parallel().tween_property(nave, "rotation:y", TAU * 2.0, 1.2)
-	tween.tween_callback(func() -> void:
-		nave.queue_free()
-		_esconder(alvo))
+	tween.tween_property(nave, "global_position:y", altura_pairar, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(nave, "rotation:y", TAU, 1.0)
+	# Feixe liga e a apresentadora é puxada para cima, girando e encolhendo.
+	tween.tween_property(feixe, "scale:y", 1.0, 0.3).set_ease(Tween.EASE_OUT)
+	tween.tween_property(alvo, "position:y", alvo.position.y + 1.6, 1.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.parallel().tween_property(alvo, "rotation:y", alvo.rotation.y + TAU * 2.0, 1.0)
+	tween.parallel().tween_property(alvo, "scale", Vector3.ONE * 0.15, 1.0).set_ease(Tween.EASE_IN)
+	tween.tween_callback(func() -> void: _esconder(alvo))
+	tween.tween_property(feixe, "scale:y", 0.01, 0.2)
+	tween.tween_callback(feixe.queue_free)
+	# Foge girando para cima e para o lado.
+	tween.tween_property(nave, "global_position", alvo.global_position + Vector3(3.0, 6.0, -2.0), 1.0).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_IN)
+	tween.parallel().tween_property(nave, "rotation:y", TAU * 4.0, 1.0)
+	tween.tween_callback(nave.queue_free)
 
 
 # ------------------------------------------------------------------------ Bruxa
