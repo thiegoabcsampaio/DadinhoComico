@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+; Cena de teste do motor lógico (Etapa 2). Sem UI, só print().
+; Rodar com F6 (cena atual) ou:
+;   godot --headless --path . res://Scenes/SimulacaoMotor.tscn
+
+[ext_resource type="Script" path="res://Scripts/SimulacaoMotor.gd" id="1_sim"]
+
+[node name="SimulacaoMotor" type="Node"]
+script = ExtResource("1_sim")
