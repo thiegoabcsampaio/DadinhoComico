@@ -4,3 +4,6 @@
 
 # Saída de exportação (Web, etc.)
 /Build/
+
+# Backups do Blender
+*.blend1

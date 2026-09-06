@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 ; NPC Apresentadora (Etapa 5).
 ; Modelo estilo PS2 gerado no Blender (Assets/Source/Personagens.blend),
@@ -6,7 +6,9 @@
 ; O personagem olha para +Z; Main.tscn gira o assento para o centro da mesa.
 
 [ext_resource type="PackedScene" path="res://Assets/Models/Apresentadora.glb" id="1_modelo"]
+[ext_resource type="Script" path="res://Scripts/NpcController.gd" id="2_controller"]
 
 [node name="Apresentadora" type="Node3D"]
+script = ExtResource("2_controller")
 
 [node name="Modelo" parent="." instance=ExtResource("1_modelo")]

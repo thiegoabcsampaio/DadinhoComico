@@ -66,7 +66,9 @@ DadinhoComico/
 │   ├── BetValidator.gd
 │   ├── DialogueLoader.gd
 │   ├── NpcAI.gd
-│   ├── NpcController.gd
+│   ├── NpcController.gd     (animacoes do .glb: Idle, tells, Apostar, Dudo, Comemorar, Castigo)
+│   ├── MesaController.gd    (copos e dados fisicos: agitar, revelar, esconder)
+│   ├── Sfx.gd               (Sfx.tocar("nome") -> Assets/Audio/SFX/nome.wav)
 │   ├── HudController.gd
 │   ├── PunishmentSystem.gd
 │   └── CameraSetup.gd
@@ -99,7 +101,7 @@ DadinhoComico/
 - Scripts GDScript: PascalCase (StateManager.gd)
 - Assets 3D: exportar do Blender como .glb (GLTF binary)
 - Texturas: .png para diffuse, normal, roughness
-- Audio: .ogg (Godot nativo)
+- Audio: SFX curtos em .wav sintetizados (Assets/Audio/SFX/); musica em .ogg
 - Todos os textos em dialogues.json na raiz, nunca hardcoded
 - Perfis de NPC como Resource (.tres) com campos: nome, agressividade, cautela, frequencia_tells- Modelos 3D: materiais so com cor base (sem texturas) enquanto o estilo PS2 nao pedir; o .blend fonte fica em Assets/Source/
 - Personagens olham para +Z no proprio .glb; a rotacao para o centro da mesa fica no assento em Main.tscn

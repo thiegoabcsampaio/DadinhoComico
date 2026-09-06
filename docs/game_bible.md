@@ -35,7 +35,7 @@ Apresentadora (parodia Xuxa):
 
 Bruxa Jacare (parodia Cuca):
 - Personalidade: sotaque interiorano, rimas de maldicao, bebe pocoes
-- Castigo: a definir
+- Castigo: a propria pocao explode em gosma verde e ela some numa nuvem de fumaca
 - Visual: pele verde, chapeu pontudo, cauda de jacare
 
 Heroi Desastrado (parodia Chapolin):
@@ -77,6 +77,10 @@ Ciborgue (parodia Exterminador):
   - Probabilidade estimada dos dados ocultos dos outros
   - Personalidade do NPC (agressividade, cautela)
 - Tiques nervosos (tells) sao ativados quando o NPC blefa em aposta de alto risco
+  (NpcAI.blefe_arriscado), com chance frequencia_tells do perfil; sao 3 animacoes
+  embarcadas no .glb: Tell_Olhar, Tell_Cocar, Tell_Bater
+- Castigos: Apresentadora some numa nave de papelao; Bruxa vira gosma e some em fumaca;
+  Heroi encolhe com a pilula; Ciborgue entra em curto e desliga; humano leva torta na cara
 
 ## RETOMADA
 

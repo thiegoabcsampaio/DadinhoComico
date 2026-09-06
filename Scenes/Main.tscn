@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 ; Cena principal.
 ; - Main.gd: fluxo da partida (humano x 4 NPCs random)
@@ -17,6 +17,7 @@
 [ext_resource type="PackedScene" path="res://Scenes/NPCs/Bruxa.tscn" id="7_bruxa"]
 [ext_resource type="PackedScene" path="res://Scenes/NPCs/Heroi.tscn" id="8_heroi"]
 [ext_resource type="PackedScene" path="res://Scenes/NPCs/Ciborgue.tscn" id="9_ciborgue"]
+[ext_resource type="Script" path="res://Scripts/PunishmentSystem.gd" id="10_castigos"]
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMaterial_studio"]
 
@@ -36,6 +37,9 @@ script = ExtResource("1_main")
 
 [node name="GameManager" type="Node" parent="."]
 script = ExtResource("2_jogo")
+
+[node name="Castigos" type="Node" parent="."]
+script = ExtResource("10_castigos")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_studio")

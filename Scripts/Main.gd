@@ -30,9 +30,17 @@ const PERFIS := {
 @onready var hud: HudController = $HUD
 @onready var camera: Camera3D = $Camera3D
 @onready var assentos: Node3D = $Assentos
+@onready var mesa: MesaController = $Mesa
+@onready var castigos: PunishmentSystem = $Castigos
 
 ## jogador_id -> NpcAI
 var _ias := {}
+## jogador_id -> NpcController (modelo animado no assento)
+var _controladores := {}
+## Dados de todos no momento do Dudo (DiceSystem remove um dado antes de
+## emitir dudo_resolvido, então a foto é tirada em dudo_declarado).
+var _revelacao := {}
+var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
@@ -47,9 +55,14 @@ func _ready() -> void:
 
 	jogo.iniciar_jogo(ids, DiceSystem.DADOS_INICIAIS, semente, nomes)
 
+	_rng.randomize()
 	var ancoras := {}
 	for id in ids:
-		ancoras[id] = assentos.get_node("Assento%d" % id)
+		var assento: Node3D = assentos.get_node("Assento%d" % id)
+		ancoras[id] = assento
+		for filho in assento.get_children():
+			if filho is NpcController:
+				_controladores[id] = filho
 	hud.configurar(jogo, JOGADOR_HUMANO, camera, ancoras)
 
 	hud.aposta_solicitada.connect(_ao_humano_apostar)
@@ -59,7 +72,8 @@ func _ready() -> void:
 	jogo.aposta_feita.connect(_ao_apostar)
 	jogo.dudo_declarado.connect(_ao_declarar_dudo)
 	jogo.dudo_resolvido.connect(_ao_resolver_dudo)
-	jogo.jogo_terminou.connect(func(_vencedor: int) -> void: Engine.time_scale = 1.0)
+	jogo.jogador_eliminado.connect(mesa.remover_copo)
+	jogo.jogo_terminou.connect(_ao_terminar)
 
 	_iniciar_rodada()
 
@@ -85,6 +99,12 @@ func _iniciar_rodada() -> void:
 	if jogo.jogo_acabou():
 		return
 	jogo.iniciar_rodada()
+	var quantidades := {}
+	for id in _controladores.keys() + [JOGADOR_HUMANO]:
+		quantidades[id] = jogo.dados.quantidade_dados(id)
+	mesa.atualizar_contagens(quantidades)
+	mesa.agitar()
+	Sfx.tocar("Dado_Agitar")
 	_processar_turno()
 
 
@@ -102,8 +122,26 @@ func _processar_turno() -> void:
 	# A rodada pode ter terminado enquanto esperávamos.
 	if not jogo.estado.esta_em(StateManager.Estado.APOSTANDO) or jogo.jogador_atual() != id:
 		return
-	jogo.executar_decisao(id, _ias[id].decidir(jogo, id))
+	var decisao: Dictionary = _ias[id].decidir(jogo, id)
+	_animar_decisao(id, decisao)
+	jogo.executar_decisao(id, decisao)
 	_processar_turno()
+
+
+## Animação do NPC para a jogada. Um blefe arriscado pode escapar num
+## tell (tique nervoso) logo após a aposta, conforme frequencia_tells.
+func _animar_decisao(id: int, decisao: Dictionary) -> void:
+	if not _controladores.has(id):
+		return
+	var controlador: NpcController = _controladores[id]
+	match decisao.get("acao"):
+		GameManager.ACAO_APOSTAR:
+			var ia: NpcAI = _ias[id]
+			var com_tell: bool = ia.blefe_arriscado and _rng.randf() < ia.perfil.frequencia_tells
+			controlador.apostar(com_tell)
+		GameManager.ACAO_DUDO:
+			controlador.tocar("Dudo")
+			Sfx.tocar("Dudo")
 
 
 ## Balão com uma fala aleatória do personagem naquela categoria.
@@ -121,7 +159,8 @@ func _ao_humano_apostar(quantidade: int, face: int) -> void:
 
 func _ao_humano_dudo() -> void:
 	# A resolução dispara dudo_resolvido -> _ao_resolver_dudo.
-	jogo.acusar_dudo(JOGADOR_HUMANO)
+	if jogo.acusar_dudo(JOGADOR_HUMANO):
+		Sfx.tocar("Dudo")
 
 
 func _ao_apostar(aposta: BetValidator.Aposta) -> void:
@@ -129,12 +168,18 @@ func _ao_apostar(aposta: BetValidator.Aposta) -> void:
 
 
 func _ao_declarar_dudo(acusador: int, acusado: int) -> void:
+	_revelacao = jogo.dados.revelar_todos()
 	_falar(acusador, "insultos", { "nome": jogo.nome(acusado) })
 	_falar(acusado, "defesas", { "nome": jogo.nome(acusador) })
 
 
 func _ao_resolver_dudo(resultado: BetValidator.ResultadoDudo) -> void:
 	hud.habilitar_vez(false)
+	mesa.revelar(_revelacao)
+	Sfx.tocar("Dado_Revelar")
+	var vencedor := resultado.aposta.jogador if resultado.aposta_verdadeira else resultado.acusador
+	if _controladores.has(vencedor):
+		_controladores[vencedor].tocar("Comemorar")
 	_reagir_e_agendar(resultado)
 
 
@@ -142,5 +187,24 @@ func _reagir_e_agendar(resultado: BetValidator.ResultadoDudo) -> void:
 	await get_tree().create_timer(atraso_reacao).timeout
 	var eliminado := jogo.dados.quantidade_dados(resultado.perdedor) == 0
 	_falar(resultado.perdedor, "castigos" if eliminado else "reacoes")
+	if eliminado:
+		_castigar(resultado.perdedor)
 	await get_tree().create_timer(maxf(0.0, atraso_entre_rodadas - atraso_reacao)).timeout
 	_iniciar_rodada()
+
+
+## Castigo cômico do eliminado (PunishmentSystem); o humano leva torta.
+func _castigar(jogador_id: int) -> void:
+	if _controladores.has(jogador_id):
+		var controlador: NpcController = _controladores[jogador_id]
+		controlador.tocar("Castigo")
+		castigos.castigar(_ias[jogador_id].perfil.chave_dialogo, controlador)
+	else:
+		castigos.castigar("", null)
+
+
+func _ao_terminar(vencedor: int) -> void:
+	Engine.time_scale = 1.0
+	Sfx.tocar("Vitoria")
+	if _controladores.has(vencedor):
+		_controladores[vencedor].tocar("Comemorar")
