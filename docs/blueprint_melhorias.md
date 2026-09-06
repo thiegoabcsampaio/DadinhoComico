@@ -26,7 +26,7 @@ codigo). Ao trocar de modelo, colar o PONTO DE RETOMADA da sessao anterior.
 
 ## Bloco B — Opus (codigo Godot, apos o Bloco A)
 
-- [ ] B1. Olhar para o jogador ao falar.
+- [x] B1. Olhar para o jogador ao falar.
       Gancho: Main._falar() -> hud.mostrar_balao(). DialogueLoader e uma
       classe estatica sem sinais; o evento de fala e a chamada de _falar.
       Implementar em NpcController: metodo olhar_para(alvo: Vector3, dur)
@@ -36,7 +36,7 @@ codigo). Ao trocar de modelo, colar o PONTO DE RETOMADA da sessao anterior.
       some (DURACAO_BALAO). Nao girar o no inteiro: o assento ja aponta
       para a mesa e look_at() no no viraria o corpo de costas para a mesa.
       Skeleton3D fica em Modelo/<Nome>_Armature/Skeleton3D.
-- [ ] B2. Troca de cadeiras a cada partida.
+- [x] B2. Troca de cadeiras a cada partida.
       Gancho: Main._ready() monta PERFIS por assento (const). Trocar por
       var perfis embaralhados (Array.shuffle()) e reparentar as instancias
       NpcController para os Assento1..4 sorteados (o Assento0 e sempre o
@@ -45,14 +45,14 @@ codigo). Ao trocar de modelo, colar o PONTO DE RETOMADA da sessao anterior.
       Main.tscn: ao reparentar, copiar o transform do NPC que ocupava o
       assento). Reiniciar partida ja recarrega a cena, entao o sorteio em
       _ready basta.
-- [ ] B3. Zoom dos dados do jogador.
+- [x] B3. Zoom dos dados do jogador.
       Gancho: HudController.ver_dados_alternado + MesaController.espiar().
       Ao ligar Ver Dados: camera.unproject_position(Copo0.global_position)
       da o ponto de tela do copo; criar 3 icones 2D (TextureRect ou Label
       com a face) no CanvasLayer nesse ponto e tweenar posicao + escala ate
       o PainelDados (%LabelMeusDados). Ao desligar, o caminho inverso.
       O copo 3D continua inclinando (espiar) por baixo.
-- [ ] B4. Game feel do painel (HUD).
+- [x] B4. Game feel do painel (HUD).
       Botoes: mouse_entered/exited -> tween de scale 1.0 <-> 1.08 com
       pivot_offset no centro; pressed -> Sfx.tocar("Clique") (gerar um
       .wav curto novo em Assets/Audio/SFX, ou reaproveitar "Tell") e uma
@@ -66,3 +66,21 @@ para a camera ao falar, assentos diferentes a cada Novo jogo, dados
 ## Bloco C — Etapa 7 (Fable + Opus, ver blueprint.md)
 
 Depende do Bloco B pronto e validado.
+
+---
+
+## Notas do Bloco B (o que mudou em relacao ao planejado)
+
+- B1: o LookAtModifier3D nativo do Godot 4.7.2 nao teve efeito (roda, resolve
+  o osso e o alvo, mas nao altera a pose). Foi trocado por Scripts/OlharModifier.gd,
+  um SkeletonModifier3D proprio que decompoe o giro em guinada e inclinacao,
+  com limites separados, preservando o balanco do Idle. Verificado por medicao
+  (residuo de 0 grau em relacao a camera) e por captura de perto.
+- B2: o sorteio usa Fisher-Yates com o RNG de Main, e nao Array.shuffle(), para
+  que o export `semente` continue reproduzindo a mesma partida, agora incluindo
+  os lugares. PERFIS passou a ser indexado por nome de personagem.
+- B3: os icones de dado e as particulas ficam numa camada "Efeitos" criada em
+  tempo de execucao como ultimo filho da HUD. O no %Baloes e o primeiro filho e
+  por isso desenha atras dos paineis, o que escondia os dados em voo.
+- B4: o som de clique (Assets/Audio/SFX/Clique.wav) e gerado por sintese em
+  tools/GerarSfx.tscn, sem depender do Blender.

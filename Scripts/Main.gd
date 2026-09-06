@@ -7,12 +7,13 @@ extends Node3D
 ## manda para os balões. Entre rodadas dá tempo para ler a revelação.
 
 const JOGADOR_HUMANO := 0
-## Perfil de NPC por assento; o assento 0 é o humano.
+## Perfil por personagem, achado pelo nome do nó em Scenes/NPCs/.
+## O assento de cada um é sorteado a cada partida (ver [method _sortear_assentos]).
 const PERFIS := {
-	1: preload("res://Resources/NPCProfiles/Apresentadora.tres"),
-	2: preload("res://Resources/NPCProfiles/Bruxa.tres"),
-	3: preload("res://Resources/NPCProfiles/Heroi.tres"),
-	4: preload("res://Resources/NPCProfiles/Ciborgue.tres"),
+	"Apresentadora": preload("res://Resources/NPCProfiles/Apresentadora.tres"),
+	"Bruxa": preload("res://Resources/NPCProfiles/Bruxa.tres"),
+	"Heroi": preload("res://Resources/NPCProfiles/Heroi.tres"),
+	"Ciborgue": preload("res://Resources/NPCProfiles/Ciborgue.tres"),
 }
 
 ## Pausa antes de cada jogada de NPC, para o jogador acompanhar.
@@ -44,10 +45,16 @@ var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	if semente != 0:
+		_rng.seed = semente
+	else:
+		_rng.randomize()
+	_sortear_assentos()
+
 	var ids: Array[int] = [JOGADOR_HUMANO]
 	var nomes := { JOGADOR_HUMANO: DialogueLoader.get_text("ui", "nome_jogador") }
-	for assento in PERFIS:
-		var perfil: NpcProfile = PERFIS[assento]
+	for assento in _controladores:
+		var perfil: NpcProfile = PERFIS[_controladores[assento].name]
 		ids.append(assento)
 		nomes[assento] = perfil.nome
 		_ias[assento] = NpcAI.new(perfil, semente + assento if semente != 0 else 0)
@@ -55,14 +62,9 @@ func _ready() -> void:
 
 	jogo.iniciar_jogo(ids, DiceSystem.DADOS_INICIAIS, semente, nomes)
 
-	_rng.randomize()
 	var ancoras := {}
 	for id in ids:
-		var assento: Node3D = assentos.get_node("Assento%d" % id)
-		ancoras[id] = assento
-		for filho in assento.get_children():
-			if filho is NpcController:
-				_controladores[id] = filho
+		ancoras[id] = assentos.get_node("Assento%d" % id)
 	hud.configurar(jogo, JOGADOR_HUMANO, camera, ancoras)
 
 	hud.aposta_solicitada.connect(_ao_humano_apostar)
@@ -82,6 +84,39 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	# Nunca deixar a aceleração vazar para outra cena.
 	Engine.time_scale = 1.0
+
+
+## Embaralha os 4 NPCs entre os assentos 1..4 no início da partida, para
+## que a mesa não seja sempre a mesma. A rotação que vira o personagem
+## para o centro está no nó do NPC, então ela pertence ao assento: o
+## transform de cada assento é guardado antes e reaplicado ao novo dono.
+## O assento 0 é sempre o humano e fica de fora. Preenche [_controladores].
+func _sortear_assentos() -> void:
+	var npcs: Array[NpcController] = []
+	## nome do assento -> transform do NPC que estava nele
+	var poses := {}
+	for assento in assentos.get_children():
+		for filho in assento.get_children():
+			if filho is NpcController:
+				npcs.append(filho)
+				poses[assento.name] = filho.transform
+
+	# Fisher-Yates com o RNG local, para a semente continuar reproduzindo
+	# a mesma partida (dados, decisões e agora também os lugares).
+	for i in range(npcs.size() - 1, 0, -1):
+		var j := _rng.randi_range(0, i)
+		var troca := npcs[i]
+		npcs[i] = npcs[j]
+		npcs[j] = troca
+
+	for i in npcs.size():
+		var npc := npcs[i]
+		var assento: Node3D = assentos.get_node("Assento%d" % (i + 1))
+		if npc.get_parent() != assento:
+			npc.get_parent().remove_child(npc)
+			assento.add_child(npc)
+		npc.transform = poses[assento.name]
+		_controladores[i + 1] = npc
 
 
 ## Modo espectador: os timers de jogada/rodada respeitam Engine.time_scale,
@@ -147,6 +182,9 @@ func _falar(jogador_id: int, categoria: String, vars: Dictionary = {}) -> void:
 		return
 	var chave: String = _ias[jogador_id].perfil.chave_dialogo
 	hud.mostrar_balao(jogador_id, DialogueLoader.get_random(chave, categoria, vars))
+	# Falou, olha para o jogador enquanto o balão estiver no ar.
+	if _controladores.has(jogador_id):
+		_controladores[jogador_id].olhar_para(camera, HudController.DURACAO_BALAO)
 
 
 func _ao_humano_apostar(quantidade: int, face: int) -> void:
@@ -159,7 +197,10 @@ func _ao_humano_apostar(quantidade: int, face: int) -> void:
 func _ao_espiar(ativo: bool) -> void:
 	if ativo and not jogo.estado.esta_em(StateManager.Estado.APOSTANDO):
 		return
-	mesa.espiar(JOGADOR_HUMANO, jogo.ver_dados(JOGADOR_HUMANO), ativo)
+	var faces := jogo.ver_dados(JOGADOR_HUMANO)
+	mesa.espiar(JOGADOR_HUMANO, faces, ativo)
+	# Os dados "voam" do copo para o painel (e voltam ao esconder).
+	hud.animar_dados(mesa.posicao_copo(JOGADOR_HUMANO), faces, ativo)
 
 
 func _ao_humano_dudo() -> void:

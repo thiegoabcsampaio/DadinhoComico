@@ -115,6 +115,15 @@ func remover_copo(jogador_id: int) -> void:
 	tween.tween_callback(func() -> void: copo.visible = false)
 
 
+## Onde o copo de um jogador está, para efeitos que saem da mesa e vão
+## para a HUD. Vector3.ZERO quando o copo já saiu de cena.
+func posicao_copo(jogador_id: int) -> Vector3:
+	var copo := _copo(jogador_id)
+	if copo == null or not copo.visible:
+		return Vector3.ZERO
+	return copo.global_position
+
+
 func _copo(jogador_id: int) -> Node3D:
 	return _copos.get_node_or_null("Copo%d" % jogador_id) as Node3D
 

@@ -13,6 +13,10 @@ func _ready() -> void:
 	var frames: int = int(args[2]) if args.size() > 2 else 30
 
 	var main: Node3D = load("res://Scenes/Main.tscn").instantiate()
+	# Semente fixa nos modos de comparação, para o sorteio de assentos não
+	# mudar entre uma captura e outra.
+	if modo.begins_with("rosto"):
+		main.semente = 7777
 	add_child(main)
 	for i in 10:
 		await get_tree().process_frame
@@ -21,14 +25,54 @@ func _ready() -> void:
 			main.mesa.revelar({ 0: [1, 2, 3], 1: [4, 5, 6], 2: [6, 6], 3: [1], 4: [2, 3, 5] })
 		"castigos":
 			main.mesa.revelar({ 0: [1, 2, 3], 1: [4, 5, 6], 2: [6, 6], 3: [1], 4: [2, 3, 5] })
-			for id in main.PERFIS:
+			for id in main._controladores:
 				main._castigar(id)
 		"torta":
 			main._castigar(main.JOGADOR_HUMANO)
 		"espiar":
 			main.mesa.espiar(main.JOGADOR_HUMANO, [2, 5, 6], true)
+		"zoom":
+			# Ver Dados pelo caminho real: HUD -> Main -> mesa + zoom na HUD.
+			main.hud._botao_ver_dados.button_pressed = true
+		"feel":
+			# Mouse sobre Apostar e clique numa face: hover, som e faíscas.
+			main.hud._botao_apostar.mouse_entered.emit()
+			main.hud._faces.get_child(3).pressed.emit()
+		"olhar":
+			# Todos falam ao mesmo tempo: as cabeças devem virar para a câmera.
+			for id in main._controladores:
+				print(_angulo_cabeca(main, id, "antes"))
+				main._falar(id, "apostas", { "aposta": "2 x face 4" })
+			for i in 40:
+				await get_tree().process_frame
+			for id in main._controladores:
+				print(_angulo_cabeca(main, id, "durante"))
+		"rosto", "rosto_olhar":
+			# Câmera junto da mesa, de frente para os dois NPCs do fundo.
+			main.camera.position = Vector3(0.0, 1.45, 0.55)
+			main.camera.rotation_degrees = Vector3(-8.0, 0.0, 0.0)
+			main.hud.visible = false
+			if modo == "rosto_olhar":
+				for id in main._controladores:
+					main._controladores[id].olhar_para(main.camera, 6.0)
+		"assentos":
+			# Quem sentou em cada assento, para conferir o sorteio.
+			for id in main._controladores:
+				print("Assento%d = %s" % [id, main._controladores[id].name])
 	for i in frames:
 		await get_tree().process_frame
 	get_viewport().get_texture().get_image().save_png(destino)
 	print("screenshot salvo em ", destino)
 	get_tree().quit()
+
+
+## Ângulo entre a direção do rosto (osso head) e a direção da câmera.
+## Perto de 0 = olhando para o jogador.
+func _angulo_cabeca(main: Node3D, id: int, quando: String) -> String:
+	var npc: Node3D = main._controladores[id]
+	var esqueleto := npc.find_child("Skeleton3D", true, false) as Skeleton3D
+	var osso := esqueleto.find_bone("head")
+	var pose := esqueleto.global_transform * esqueleto.get_bone_global_pose(osso)
+	var frente: Vector3 = pose.basis.z.normalized()
+	var para_camera: Vector3 = (main.camera.global_position - pose.origin).normalized()
+	return "%-9s %-14s desvio da camera: %5.1f graus" % [quando, npc.name, rad_to_deg(frente.angle_to(para_camera))]

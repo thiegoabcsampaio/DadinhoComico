@@ -19,6 +19,14 @@ signal ver_dados_alternado(ativo: bool)
 const CENA_BALAO := preload("res://Scenes/BalaoDialogo.tscn")
 const DURACAO_BALAO := 2.5
 
+## Ver Dados: tempo do voo dos dados entre a mesa e o painel.
+const DURACAO_ZOOM := 0.4
+## Tamanho do ícone de dado que voa.
+const TAMANHO_DADO := Vector2(44.0, 44.0)
+## Botões crescem este tanto sob o mouse.
+const ESCALA_HOVER := 1.08
+const DURACAO_HOVER := 0.12
+
 @onready var _label_info: Label = %LabelInfo
 @onready var _label_mesa: Label = %LabelDadosMesa
 @onready var _label_status: Label = %LabelStatus
@@ -48,6 +56,10 @@ var _baloes := {}
 var _vez_ativa := false
 var _quantidade := 1
 var _face := DiceSystem.FACE_MIN
+## Ícones de dado em voo entre a mesa e o painel.
+var _dados_voando: Array[Control] = []
+## Camada acima dos painéis, para efeitos que não podem ficar escondidos.
+var _camada_efeitos: Control
 
 
 func _t(chave: String) -> String:
@@ -81,7 +93,151 @@ func _ready() -> void:
 		ver_dados_alternado.emit(ativo))
 	_painel_dados.visible = false
 	_label_status.text = ""
+	_criar_camada_efeitos()
+	_preparar_game_feel()
 	habilitar_vez(false)
+
+
+## Os balões ficam atrás dos painéis (nó %Baloes, primeiro filho). Dados em
+## voo e faíscas precisam do contrário, então vão numa camada criada por
+## último, que é desenhada por cima de tudo.
+func _criar_camada_efeitos() -> void:
+	_camada_efeitos = Control.new()
+	_camada_efeitos.name = "Efeitos"
+	_camada_efeitos.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_camada_efeitos)
+	_camada_efeitos.set_anchors_preset(Control.PRESET_FULL_RECT)
+
+
+# ------------------------------------------------------ Game feel dos botões
+
+## Todo botão cresce sob o mouse, afunda no clique, solta faíscas e toca um
+## clique. Só reação visual: quem decide o que a jogada faz continua sendo
+## quem ouve os sinais.
+func _preparar_game_feel() -> void:
+	for botao in _botoes():
+		_centralizar_pivo(botao)
+		botao.resized.connect(_centralizar_pivo.bind(botao))
+		botao.mouse_entered.connect(_escalar_botao.bind(botao, ESCALA_HOVER))
+		botao.mouse_exited.connect(_escalar_botao.bind(botao, 1.0))
+		botao.pressed.connect(_ao_clicar_botao.bind(botao))
+
+
+func _botoes() -> Array[Button]:
+	var lista: Array[Button] = [
+		_botao_menos, _botao_mais, _botao_apostar, _botao_dudo,
+		_botao_ver_dados, _botao_acelerar, _botao_encerrar,
+	]
+	for face in _faces.get_children():
+		lista.append(face as Button)
+	return lista
+
+
+## O botão precisa escalar a partir do centro, não do canto.
+func _centralizar_pivo(botao: Control) -> void:
+	botao.pivot_offset = botao.size * 0.5
+
+
+func _escalar_botao(botao: Button, escala: float) -> void:
+	if botao.disabled and escala > 1.0:
+		return
+	var tween := create_tween()
+	tween.tween_property(botao, "scale", Vector2.ONE * escala, DURACAO_HOVER) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _ao_clicar_botao(botao: Button) -> void:
+	Sfx.tocar("Clique", -6.0)
+	botao.scale = Vector2.ONE * 0.9
+	var tween := create_tween()
+	tween.tween_property(botao, "scale", Vector2.ONE * ESCALA_HOVER, 0.22) \
+		.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	_faiscas(botao.get_global_rect().get_center())
+
+
+## Faíscas curtas no ponto do clique.
+func _faiscas(posicao: Vector2) -> void:
+	var particulas := CPUParticles2D.new()
+	particulas.amount = 8
+	particulas.lifetime = 0.5
+	particulas.one_shot = true
+	particulas.explosiveness = 1.0
+	particulas.direction = Vector2.UP
+	particulas.spread = 180.0
+	particulas.initial_velocity_min = 90.0
+	particulas.initial_velocity_max = 170.0
+	particulas.gravity = Vector2(0.0, 240.0)
+	particulas.scale_amount_min = 2.0
+	particulas.scale_amount_max = 4.0
+	particulas.color = Color(1.0, 0.85, 0.25)
+	_camada_efeitos.add_child(particulas)
+	particulas.global_position = posicao
+	particulas.emitting = true
+	get_tree().create_timer(particulas.lifetime + 0.2).timeout.connect(particulas.queue_free)
+
+
+# --------------------------------------------------- Zoom dos dados (Ver Dados)
+
+## Leva os dados do jogador do copo na mesa até o painel "Seus dados"
+## ([entrando] verdadeiro) ou de volta ao copo. [origem] é a posição do copo
+## no mundo; [faces] são as faces reais, as mesmas que o copo 3D mostra.
+func animar_dados(origem: Vector3, faces: Array, entrando: bool) -> void:
+	_limpar_dados_voando()
+	if _camera == null or faces.is_empty() or origem == Vector3.ZERO:
+		return
+	if _camera.is_position_behind(origem):
+		return
+
+	var na_mesa := _camera.unproject_position(origem) - TAMANHO_DADO * 0.5
+	var centro_painel := _painel_dados.get_global_rect().get_center()
+	for i in faces.size():
+		var icone := _criar_icone_dado(int(faces[i]))
+		_camada_efeitos.add_child(icone)
+		_dados_voando.append(icone)
+
+		var lado := (float(i) - (faces.size() - 1) * 0.5) * (TAMANHO_DADO.x + 6.0)
+		var no_painel := centro_painel + Vector2(lado, 0.0) - TAMANHO_DADO * 0.5
+		icone.position = na_mesa if entrando else no_painel
+		icone.scale = Vector2.ONE * (0.3 if entrando else 1.0)
+		icone.modulate.a = 0.0
+
+		var tween := create_tween()
+		tween.tween_interval(i * 0.07)
+		tween.tween_property(icone, "modulate:a", 1.0, 0.12)
+		tween.parallel().tween_property(icone, "position", no_painel if entrando else na_mesa, DURACAO_ZOOM) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(icone, "scale", Vector2.ONE * (1.0 if entrando else 0.3), DURACAO_ZOOM)
+		tween.tween_interval(0.12)
+		tween.tween_property(icone, "modulate:a", 0.0, 0.22)
+		tween.tween_callback(icone.queue_free)
+
+
+func _limpar_dados_voando() -> void:
+	for icone in _dados_voando:
+		if is_instance_valid(icone):
+			icone.queue_free()
+	_dados_voando.clear()
+
+
+## Dado desenhado como no seletor de faces: número escuro em ficha clara.
+func _criar_icone_dado(face: int) -> Label:
+	var icone := Label.new()
+	icone.text = str(face)
+	icone.size = TAMANHO_DADO
+	icone.custom_minimum_size = TAMANHO_DADO
+	icone.pivot_offset = TAMANHO_DADO * 0.5
+	icone.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	icone.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	icone.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icone.add_theme_font_size_override("font_size", 26)
+	icone.add_theme_color_override("font_color", Color(0.12, 0.1, 0.08))
+	var caixa := StyleBoxFlat.new()
+	caixa.bg_color = Color(0.99, 0.86, 0.35)
+	caixa.border_color = Color(0.15, 0.12, 0.1)
+	caixa.set_border_width_all(3)
+	caixa.set_corner_radius_all(9)
+	icone.add_theme_stylebox_override("normal", caixa)
+	return icone
 
 
 ## [ancoras]: jogador_id -> Node3D onde o balão de fala se prende.

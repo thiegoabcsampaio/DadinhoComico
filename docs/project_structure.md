@@ -70,6 +70,7 @@ DadinhoComico/
 │   ├── NpcController.gd     (animacoes do .glb: Idle, tells, Apostar, Dudo, Comemorar, Castigo)
 │   ├── MesaController.gd    (copos e dados fisicos: agitar, revelar, esconder)
 │   ├── Sfx.gd               (Sfx.tocar("nome") -> Assets/Audio/SFX/nome.wav)
+│   ├── OlharModifier.gd     (gira so o osso da cabeca na direcao de um alvo)
 │   ├── HudController.gd
 │   ├── PunishmentSystem.gd
 │   └── CameraSetup.gd
@@ -86,6 +87,8 @@ DadinhoComico/
 │       └── [plugin MCP]
 ├── tools/
 │   ├── Screenshot.tscn          (valida a camera fixa sem abrir o editor)
+│   ├── DumpTree.tscn            (imprime arvore, ossos e animacoes de uma cena)
+│   ├── GerarSfx.tscn            (sintetiza SFX curtos, ex.: Clique.wav)
 │   └── Screenshot.gd
 └── docs/
     ├── system_prompt.md
