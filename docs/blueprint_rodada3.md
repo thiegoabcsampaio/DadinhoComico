@@ -101,9 +101,10 @@ comecar o bloco correspondente.
       um leve zoom (FOV) na camera, voltando ao normal ao fim do balao.
 - [x] B8. Olho robotico do Ciborgue: preto por padrao; ao perder um dado,
       acende vermelho por alguns segundos (material "Cib_OlhoRobo").
-- [ ] B9. [A CONFIRMAR] "Ao iniciar nova rodada": instrucao chegou
-      incompleta. O usuario ainda nao respondeu; perguntar de novo antes
-      de fechar o Bloco B.
+- [x] B9. "Ao iniciar nova rodada": o usuario confirmou que o que ja existe
+      basta - copos chacoalham, toca o som dos dados, o log abre a rodada e,
+      se Ver Dados estiver ligado, os dados novos voltam ao painel. Nada a
+      acrescentar.
 
 Criterio de conclusao do Bloco B: partida no F5 escolhendo um personagem no
 menu, jogando pelo modelo dele no fundo da mesa, com falas dinamicas, baloes
