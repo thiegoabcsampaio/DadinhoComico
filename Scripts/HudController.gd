@@ -13,6 +13,8 @@ signal dudo_solicitado()
 signal acelerar_alternado(ativo: bool)
 ## Encerrar a partida atual / começar um novo jogo.
 signal encerrar_solicitado()
+## Botão Ver Dados ligado/desligado (o copo do jogador espia na mesa 3D).
+signal ver_dados_alternado(ativo: bool)
 
 const CENA_BALAO := preload("res://Scenes/BalaoDialogo.tscn")
 const DURACAO_BALAO := 2.5
@@ -74,7 +76,9 @@ func _ready() -> void:
 		botao.pressed.connect(_definir_face.bind(i + DiceSystem.FACE_MIN))
 	_botao_apostar.pressed.connect(func() -> void: aposta_solicitada.emit(_quantidade, _face))
 	_botao_dudo.pressed.connect(func() -> void: dudo_solicitado.emit())
-	_botao_ver_dados.toggled.connect(func(ativo: bool) -> void: _painel_dados.visible = ativo)
+	_botao_ver_dados.toggled.connect(func(ativo: bool) -> void:
+		_painel_dados.visible = ativo
+		ver_dados_alternado.emit(ativo))
 	_painel_dados.visible = false
 	_label_status.text = ""
 	habilitar_vez(false)

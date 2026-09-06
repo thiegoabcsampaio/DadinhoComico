@@ -69,6 +69,7 @@ func _ready() -> void:
 	hud.dudo_solicitado.connect(_ao_humano_dudo)
 	hud.acelerar_alternado.connect(_ao_alternar_aceleracao)
 	hud.encerrar_solicitado.connect(_reiniciar_partida)
+	hud.ver_dados_alternado.connect(_ao_espiar)
 	jogo.aposta_feita.connect(_ao_apostar)
 	jogo.dudo_declarado.connect(_ao_declarar_dudo)
 	jogo.dudo_resolvido.connect(_ao_resolver_dudo)
@@ -99,10 +100,6 @@ func _iniciar_rodada() -> void:
 	if jogo.jogo_acabou():
 		return
 	jogo.iniciar_rodada()
-	var quantidades := {}
-	for id in _controladores.keys() + [JOGADOR_HUMANO]:
-		quantidades[id] = jogo.dados.quantidade_dados(id)
-	mesa.atualizar_contagens(quantidades)
 	mesa.agitar()
 	Sfx.tocar("Dado_Agitar")
 	_processar_turno()
@@ -155,6 +152,14 @@ func _falar(jogador_id: int, categoria: String, vars: Dictionary = {}) -> void:
 func _ao_humano_apostar(quantidade: int, face: int) -> void:
 	if jogo.fazer_aposta(JOGADOR_HUMANO, quantidade, face):
 		_processar_turno()
+
+
+## Ver Dados: o copo do jogador inclina e mostra os próprios dados.
+## Fora da fase de apostas (revelação em curso) só é permitido esconder.
+func _ao_espiar(ativo: bool) -> void:
+	if ativo and not jogo.estado.esta_em(StateManager.Estado.APOSTANDO):
+		return
+	mesa.espiar(JOGADOR_HUMANO, jogo.ver_dados(JOGADOR_HUMANO), ativo)
 
 
 func _ao_humano_dudo() -> void:

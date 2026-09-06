@@ -3,7 +3,8 @@ extends Node
 ## um PNG da câmera fixa. Uso:
 ##   godot --path . tools/Screenshot.tscn -- <png> [modo] [frames]
 ## modo: "jogo" (padrão), "revelacao" (copos levantados com faces),
-## "castigos" (dispara o castigo dos 4 NPCs) ou "torta" (castigo do humano).
+## "castigos" (dispara o castigo dos 4 NPCs), "torta" (castigo do humano)
+## ou "espiar" (copo do jogador inclinado mostrando os dados).
 
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
@@ -24,6 +25,8 @@ func _ready() -> void:
 				main._castigar(id)
 		"torta":
 			main._castigar(main.JOGADOR_HUMANO)
+		"espiar":
+			main.mesa.espiar(main.JOGADOR_HUMANO, [2, 5, 6], true)
 	for i in frames:
 		await get_tree().process_frame
 	get_viewport().get_texture().get_image().save_png(destino)

@@ -27,7 +27,8 @@ DadinhoComico/
 │   │   ├── Apresentadora.glb
 │   │   ├── Bruxa.glb
 │   │   ├── Heroi.glb
-│   │   └── Ciborgue.glb
+│   │   ├── Ciborgue.glb
+│   │   └── Nave.glb             (nave de papelao com X, castigo da Apresentadora)
 │   ├── Source/
 │   │   ├── .gdignore            (Godot nao importa esta pasta)
 │   │   └── Personagens.blend    (fonte dos modelos; regenerado via Blender MCP)

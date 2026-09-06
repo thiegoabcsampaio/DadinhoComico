@@ -3,7 +3,7 @@
 		"nome_jogador": "Você",
 		"sua_vez": "Sua vez!",
 		"vez_de": "Vez de %s...",
-		"dudo": "DUDO!",
+		"dudo": "DESCONFIO!",
 		"info_rodada": "Rodada %d  —  Aposta atual: %s",
 		"sem_aposta": "nenhuma",
 		"info_aposta": "%s (%s)",
@@ -14,7 +14,7 @@
 		"eliminado": "%s ficou sem dados! CASTIGO!",
 		"vencedor": "Fim de jogo — %s venceu!",
 		"botao_apostar": "Apostar",
-		"botao_dudo": "Dudo!",
+		"botao_dudo": "Desconfio!",
 		"botao_ver_dados": "Ver Dados",
 		"titulo_quantidade": "Quantidade",
 		"titulo_face": "Face",
@@ -33,9 +33,9 @@
 			"Vamos animar essa mesa: {aposta}!"
 		],
 		"insultos": [
-			"Ai, {nome}, mentira tem perna curta, baixinho! Dudo!",
-			"Dudo! A tia percebe quando um baixinho tá inventando história!",
-			"Isso não vale, {nome}! Dudo, dudo, dudo!"
+			"Ai, {nome}, mentira tem perna curta, baixinho! Desconfio!",
+			"Desconfio! A tia percebe quando um baixinho tá inventando história!",
+			"Isso não vale, {nome}! Desconfio, desconfio, desconfio!"
 		],
 		"defesas": [
 			"Eu? Mentindo? A tia nunca mentiria pros baixinhos!",
@@ -61,9 +61,9 @@
 			"Vixe, minha bola de cristal falou: {aposta}!"
 		],
 		"insultos": [
-			"Dudo, {nome}! Mentira de jacaré eu farejo de longe!",
-			"Ocê tá mentindo, e eu vou provar: dudo, viu!",
-			"Rima pra ocê, {nome}: quem mente, se arrepende! Dudo!"
+			"Desconfio, {nome}! Mentira de jacaré eu farejo de longe!",
+			"Ocê tá mentindo, e eu vou provar: desconfio, viu!",
+			"Rima pra ocê, {nome}: quem mente, se arrepende! Desconfio!"
 		],
 		"defesas": [
 			"Eu, mentindo? Cruz-credo, {nome}!",
@@ -89,9 +89,9 @@
 			"Mais vale um dado na mão do que dois voando: {aposta}!"
 		],
 		"insultos": [
-			"Suspeitei desde o primeiro dado, {nome}! Dudo!",
-			"Dudo! Meu martelo biônico detecta mentiras a quilômetros!",
-			"Como diz o ditado: quem mente uma vez, cai do cavalo! Dudo, {nome}!"
+			"Suspeitei desde o primeiro dado, {nome}! Desconfio!",
+			"Desconfio! Meu martelo biônico detecta mentiras a quilômetros!",
+			"Como diz o ditado: quem mente uma vez, cai do cavalo! Desconfio, {nome}!"
 		],
 		"defesas": [
 			"Calma, {nome}, calma! Que não cunda o pânico!",
@@ -117,9 +117,9 @@
 			"{aposta}. Meus sensores não mentem. Eu, talvez."
 		],
 		"insultos": [
-			"Hasta la vista, dadinho. Dudo, {nome}.",
-			"Dudo. Sua aposta viola três leis da estatística.",
-			"Detectada anomalia na sua história, {nome}. Dudo."
+			"Hasta la vista, dadinho. Desconfio, {nome}.",
+			"Desconfio. Sua aposta viola três leis da estatística.",
+			"Detectada anomalia na sua história, {nome}. Desconfio."
 		],
 		"defesas": [
 			"Acusação registrada. Resultado previsto: você perde, {nome}.",

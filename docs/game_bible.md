@@ -56,7 +56,7 @@ Ciborgue (parodia Exterminador):
 - Inicio da rodada: todos agitam e escondem os dados
 - Jogadores fazem apostas crescentes sobre a quantidade total de uma face entre todos os copos
 - Apostas devem ser sempre maiores que a anterior (quantidade ou face)
-- Qualquer jogador pode acusar o anterior de mentir ("Dudo!")
+- Qualquer jogador pode acusar o anterior de mentir ("Desconfio!"; no codigo a acao continua chamada de dudo)
 - Resolucao: todos revelam os dados
   - Se a aposta era verdadeira: acusador perde 1 dado
   - Se a aposta era falsa: apostador perde 1 dado

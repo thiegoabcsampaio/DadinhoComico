@@ -7,7 +7,8 @@ extends Node
 ## Game Bible; o humano leva torta na cara (overlay 2D). Todos os efeitos
 ## são procedurais (sem assets extras) e se limpam sozinhos.
 
-const COR_PAPELAO := Color(0.5, 0.33, 0.16)
+## Nave de papelão com o X gigante (Assets/Source/Personagens.blend).
+const CENA_NAVE := preload("res://Assets/Models/Nave.glb")
 const COR_GOSMA := Color(0.35, 0.9, 0.2)
 const COR_CREME := Color(1.0, 0.96, 0.85)
 
@@ -32,10 +33,10 @@ func castigar(chave: String, alvo: Node3D) -> void:
 ## Uma nave espacial de papelão desce, engole a apresentadora e decola.
 func _nave_de_papelao(alvo: Node3D) -> void:
 	Sfx.tocar("Castigo_Nave")
-	var nave := _montar_nave()
+	var nave: Node3D = CENA_NAVE.instantiate()
 	alvo.add_child(nave)
 	nave.position = Vector3(0.0, 4.0, 0.0)
-	nave.scale = Vector3.ONE * 0.6
+	nave.scale = Vector3.ONE * 0.65
 
 	var tween := create_tween()
 	tween.tween_property(nave, "position:y", 0.0, 0.9).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
@@ -46,52 +47,6 @@ func _nave_de_papelao(alvo: Node3D) -> void:
 	tween.tween_callback(func() -> void:
 		nave.queue_free()
 		_esconder(alvo))
-
-
-func _montar_nave() -> Node3D:
-	var nave := Node3D.new()
-	var papelao := _material(COR_PAPELAO, 0.9)
-	var corpo := MeshInstance3D.new()
-	var cil := CylinderMesh.new()
-	cil.top_radius = 0.32
-	cil.bottom_radius = 0.42
-	cil.height = 1.3
-	cil.radial_segments = 10
-	corpo.mesh = cil
-	corpo.material_override = papelao
-	corpo.position.y = 0.75
-	nave.add_child(corpo)
-
-	var bico := MeshInstance3D.new()
-	var cone := CylinderMesh.new()
-	cone.top_radius = 0.0
-	cone.bottom_radius = 0.34
-	cone.height = 0.6
-	cone.radial_segments = 10
-	bico.mesh = cone
-	bico.material_override = papelao
-	bico.position.y = 1.7
-	nave.add_child(bico)
-
-	for i in 3:
-		var aleta := MeshInstance3D.new()
-		var caixa := BoxMesh.new()
-		caixa.size = Vector3(0.04, 0.45, 0.32)
-		aleta.mesh = caixa
-		aleta.material_override = _material(Color(0.85, 0.2, 0.2), 0.8)
-		aleta.position = Vector3(0.0, 0.25, 0.0) + Vector3(0.5, 0.0, 0.0).rotated(Vector3.UP, i * TAU / 3.0)
-		aleta.rotation.y = i * TAU / 3.0
-		nave.add_child(aleta)
-
-	var janela := MeshInstance3D.new()
-	var esfera := SphereMesh.new()
-	esfera.radius = 0.12
-	esfera.height = 0.24
-	janela.mesh = esfera
-	janela.material_override = _material(Color(0.5, 0.85, 1.0), 0.2)
-	janela.position = Vector3(0.0, 1.0, 0.34)
-	nave.add_child(janela)
-	return nave
 
 
 # ------------------------------------------------------------------------ Bruxa
