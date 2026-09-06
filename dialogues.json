@@ -26,7 +26,9 @@
 		"botao_falar": "Falar",
 		"titulo_menu": "Dadinho Cômico",
 		"titulo_escolha": "Escolha quem você vai ser na mesa",
-		"botao_jogar": "Jogar"
+		"botao_jogar": "Jogar",
+		"log_rodada": "Rodada %d",
+		"titulo_log": "Histórico da partida"
 	},
 
 	"apresentadora": {
@@ -35,8 +37,8 @@
 			"Oi, baixinhos! A tia veio brilhar, e quem mentir vai passear de nave!"
 		],
 		"provocacoes": [
-			"{nome}, baixinho, essa cara de quem comeu e nao gostou não me engana!",
-			"Levanta a mao quem acha que {nome} tá inventando historia!",
+			"{nome}, baixinho, essa cara de quem comeu e não gostou não me engana!",
+			"Levanta a mão quem acha que {nome} tá inventando história!",
 			"Relaxa, {nome}, a tia só quer o seu dadinho. Todos eles."
 		],
 		"reacoes_provocacao": [

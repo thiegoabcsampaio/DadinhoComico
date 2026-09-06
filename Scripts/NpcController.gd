@@ -90,6 +90,33 @@ func tell() -> void:
 	tocar(TELLS[_rng.randi() % TELLS.size()])
 
 
+## Acende o olho robótico (Ciborgue) por [duracao] segundos: preto em
+## repouso, vermelho de alerta quando ele erra. Ignorado em quem não tem
+## o material "OlhoRobo". O material é duplicado por instância para não
+## acender o olho de outra cópia do mesmo modelo.
+func acender_olho(duracao: float = 2.5) -> void:
+	var malha := find_child("*", true, false) as MeshInstance3D
+	for filho in find_children("*", "MeshInstance3D", true, false):
+		malha = filho as MeshInstance3D
+		for i in malha.mesh.get_surface_count():
+			var material := malha.get_active_material(i)
+			if material == null or not material.resource_name.contains("OlhoRobo"):
+				continue
+			var proprio := material.duplicate() as StandardMaterial3D
+			proprio.emission_enabled = true
+			proprio.emission = Color(1.0, 0.08, 0.06)
+			proprio.emission_energy_multiplier = 0.0
+			malha.set_surface_override_material(i, proprio)
+			var tween := create_tween()
+			tween.tween_property(proprio, "emission_energy_multiplier", 4.0, 0.15)
+			for p in 3:
+				tween.tween_property(proprio, "emission_energy_multiplier", 1.2, 0.2)
+				tween.tween_property(proprio, "emission_energy_multiplier", 4.0, 0.2)
+			tween.tween_interval(maxf(0.0, duracao - 1.6))
+			tween.tween_property(proprio, "emission_energy_multiplier", 0.0, 0.4)
+			return
+
+
 ## Deixa o modelo parado (usado quando o castigo o tira de cena).
 func congelar() -> void:
 	if _tween_olhar != null and _tween_olhar.is_valid():

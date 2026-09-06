@@ -38,6 +38,24 @@ func _ready() -> void:
 				main._castigar(id)
 		"espiar":
 			main.mesa.espiar(main.JOGADOR_HUMANO, [2, 5, 6], true)
+		"falas":
+			# Painel de provocações aberto na vez do jogador.
+			main.hud._botao_falar.pressed.emit()
+		"narrador":
+			main.hud.mostrar_balao(HudController.NARRADOR, DialogueLoader.get_random("narrador", "resultado", { "face": 4, "contagem": 3, "veredicto": "VERDADEIRA", "perdedor": "Bruxa" }), 6.0)
+		"efeito":
+			# Castigo do personagem do jogador: modelo + efeito de tela.
+			main._castigar(main.JOGADOR_HUMANO)
+		"log":
+			main.hud._botao_log.button_pressed = true
+			# Enche o log com uma sequência de falas e eventos.
+			for id in main._controladores:
+				main._falar(id, "apostas", { "aposta": "2 x face 4" })
+				await get_tree().create_timer(0.05).timeout
+			for id in main._controladores:
+				main._falar(id, "reacoes")
+				await get_tree().create_timer(0.05).timeout
+			main.hud.registrar_evento("Face 4 apareceu 3 vezes: aposta VERDADEIRA.")
 		"zoom":
 			# Ver Dados pelo caminho real: HUD -> Main -> mesa + zoom na HUD.
 			main.hud._botao_ver_dados.button_pressed = true

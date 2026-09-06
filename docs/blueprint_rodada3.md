@@ -75,31 +75,31 @@ comecar o bloco correspondente.
 
 ## Bloco B — Opus (codigo Godot, apos o Bloco A)
 
-- [ ] B1. Menu e selecao: Menu.tscn funcional (cartao por personagem com nome
+- [x] B1. Menu e selecao: Menu.tscn funcional (cartao por personagem com nome
       e frase de apresentacao de dialogues.json, botao Jogar), Partida guarda
       a escolha, Main coloca o escolhido no assento do fundo e liga a HUD a
       ele: aposta/desconfio disparam as animacoes Apostar/Dudo no modelo, o
       balao sai do modelo, castigo do personagem no modelo + EFEITO DE TELA
       do personagem (ver Decisoes de desenho).
       Ver Dados continua espiando o copo do jogador (agora no fundo).
-- [ ] B2. Baloes sem sobreposicao: BalaoDialogo/HudController com fila por
+- [x] B2. Baloes sem sobreposicao: BalaoDialogo/HudController com fila por
       tempo (um balao de cada vez, os demais esperam) ou deslocamento vertical
       quando dois falam juntos (insulto + defesa). Decidir pelo que ler melhor
       e registrar nas notas.
-- [ ] B3. Log de historico a esquerda (estilo app de mensagens): registra
+- [x] B3. Log de historico a esquerda (estilo app de mensagens): registra
       falas, apostas, Desconfio, revelacoes e castigos de todos, com nome e
       cor por personagem; rolagem automatica; some/limpa no Novo jogo.
-- [ ] B4. Falas dinamicas (dialogo estilo RPG): no turno do jogador, botao
+- [x] B4. Falas dinamicas (dialogo estilo RPG): no turno do jogador, botao
       "Falar" abre 3 opcoes vindas de "provocacoes" do personagem dele; ao
       escolher, sai no balao dele e o NPC alvo (ou o proximo) responde com
       "reacoes_provocacao". Nao gasta a jogada.
-- [ ] B5. Dados no painel: os icones que voam ficam no painel no lugar dos
+- [x] B5. Dados no painel: os icones que voam ficam no painel no lugar dos
       numeros (nao somem); ao desligar Ver Dados voam de volta ao copo.
-- [ ] B6. Resultado da revelacao tambem num balao "narrador" ancorado no
+- [x] B6. Resultado da revelacao tambem num balao "narrador" ancorado no
       centro da mesa (alem do texto de status).
-- [ ] B7. Ao NPC olhar para a camera (fala): escurecer levemente a cena e dar
+- [x] B7. Ao NPC olhar para a camera (fala): escurecer levemente a cena e dar
       um leve zoom (FOV) na camera, voltando ao normal ao fim do balao.
-- [ ] B8. Olho robotico do Ciborgue: preto por padrao; ao perder um dado,
+- [x] B8. Olho robotico do Ciborgue: preto por padrao; ao perder um dado,
       acende vermelho por alguns segundos (material "Cib_OlhoRobo").
 - [ ] B9. [A CONFIRMAR] "Ao iniciar nova rodada": instrucao chegou
       incompleta. O usuario ainda nao respondeu; perguntar de novo antes
@@ -138,3 +138,34 @@ legiveis, log a esquerda, dados no painel e revelacao em balao.
   e o zoom = animar Camera3D.fov (58 -> 52).
 - tools/Screenshot.tscn: modos jogo, revelacao, castigos, espiar, zoom, feel, olhar,
   assentos, rosto, rosto_olhar, menu.
+
+---
+
+## Notas do Bloco B (decisoes e desvios do planejado)
+
+- B1: o modelo do jogador toca Apostar/Dudo/Castigo como qualquer outro; o balao
+  dele ja saia do assento. Efeitos de tela em Scripts/EfeitoTela.gd (CanvasLayer
+  no Main), um por personagem, disparados so quando o castigado e o jogador.
+- B2: a causa da sobreposicao nao era so posicao. O balao nao tinha largura
+  maxima: uma fala longa virava um retangulo de 600 px que saia da tela. Agora o
+  texto quebra em 300 px, o balao e preso dentro da tela e o HudController
+  resolve colisoes empurrando para cima; a cauda estica e continua apontando o
+  personagem. O desvio e guardado no proprio balao (Vector2), senao ele era
+  descartado no quadro seguinte, quando o balao recalcula a posicao.
+- B3: o log (Scripts/LogHistorico.gd) comeca FECHADO atras de um icone no canto
+  superior esquerdo (pedido do usuario durante o bloco): aberto o tempo todo ele
+  cobria os personagens da esquerda. Quando esta aberto, os baloes que cairiam
+  sobre ele deslizam para a direita. Some com a partida (a cena recarrega).
+- B4: o botao Falar fica junto de Apostar/Desconfio, so na vez do jogador, e nao
+  gasta a jogada. As 3 opcoes vem de "provocacoes" do personagem do jogador com
+  o nome do proximo jogador; o alvo responde com "reacoes_provocacao".
+- B5: os dados param no painel (sobre o LabelMeusDados, que fica vazio enquanto
+  isso) e voltam voando ao copo quando Ver Dados desliga. Se a rodada virar com
+  Ver Dados ligado, Main repoe os dados novos depois do agitar.
+- B6: balao do narrador ancorado num Marker3D no centro da mesa, com
+  deslocamento baixo (0,12 m) para nao sair pelo topo do quadro.
+- B7: EfeitoTela.focar() anima tonemap_exposure (0.85 -> 0.62) e o fov
+  (58 -> 52) enquanto o balao esta no ar.
+- B8: NpcController.acender_olho() duplica o material "OlhoRobo" na superficie
+  daquela instancia e anima a emissao; quem nao tem o material ignora.
+- Novos modos em tools/Screenshot.tscn: falas, efeito, log, narrador.

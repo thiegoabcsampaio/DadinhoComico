@@ -15,6 +15,13 @@ const PERFIS := {
 	"Heroi": preload("res://Resources/NPCProfiles/Heroi.tres"),
 	"Ciborgue": preload("res://Resources/NPCProfiles/Ciborgue.tres"),
 }
+## Cor de cada personagem no log de histórico.
+const CORES := {
+	"Apresentadora": Color(1.0, 0.45, 0.72),
+	"Bruxa": Color(0.55, 0.85, 0.35),
+	"Heroi": Color(1.0, 0.42, 0.35),
+	"Ciborgue": Color(0.62, 0.78, 1.0),
+}
 
 ## Pausa antes de cada jogada de NPC, para o jogador acompanhar.
 @export var atraso_npc: float = 1.2
@@ -33,6 +40,10 @@ const PERFIS := {
 @onready var assentos: Node3D = $Assentos
 @onready var mesa: MesaController = $Mesa
 @onready var castigos: PunishmentSystem = $Castigos
+@onready var efeitos: EfeitoTela = $Efeitos
+@onready var ambiente: WorldEnvironment = $WorldEnvironment
+## Onde o balão do narrador (revelação) se prende: o centro da mesa.
+@onready var marcador_narrador: Marker3D = $MarcadorNarrador
 
 ## jogador_id -> NpcAI
 var _ias := {}
@@ -64,9 +75,14 @@ func _ready() -> void:
 
 	jogo.iniciar_jogo(ids, DiceSystem.DADOS_INICIAIS, semente, nomes)
 
+	efeitos.configurar(camera, ambiente.environment)
+
 	var ancoras := {}
 	for id in ids:
 		ancoras[id] = assentos.get_node("Assento%d" % id)
+	ancoras[HudController.NARRADOR] = marcador_narrador
+	for id in ids:
+		hud.cores_jogadores[id] = CORES.get(_controladores[id].name, Color.WHITE)
 	hud.configurar(jogo, JOGADOR_HUMANO, camera, ancoras)
 
 	hud.aposta_solicitada.connect(_ao_humano_apostar)
@@ -74,6 +90,7 @@ func _ready() -> void:
 	hud.acelerar_alternado.connect(_ao_alternar_aceleracao)
 	hud.encerrar_solicitado.connect(_reiniciar_partida)
 	hud.ver_dados_alternado.connect(_ao_espiar)
+	hud.provocacao_escolhida.connect(_ao_provocar)
 	jogo.aposta_feita.connect(_ao_apostar)
 	jogo.dudo_declarado.connect(_ao_declarar_dudo)
 	jogo.dudo_resolvido.connect(_ao_resolver_dudo)
@@ -158,6 +175,9 @@ func _iniciar_rodada() -> void:
 	jogo.iniciar_rodada()
 	mesa.agitar()
 	Sfx.tocar("Dado_Agitar")
+	# Dados novos: se o jogador estava espiando, mostra os de agora.
+	if hud.espiando():
+		_ao_espiar(true)
 	_processar_turno()
 
 
@@ -168,6 +188,12 @@ func _processar_turno() -> void:
 	var id := jogo.jogador_atual()
 	if id == JOGADOR_HUMANO:
 		hud.habilitar_vez(true)
+		# Provocações do personagem do jogador contra quem joga em seguida.
+		var alvo := jogo.turnos.proximo_apos(JOGADOR_HUMANO)
+		var opcoes: Array = []
+		for frase in DialogueLoader.get_lines(_chave(JOGADOR_HUMANO), "provocacoes"):
+			opcoes.append(str(frase).format({ "nome": jogo.nome(alvo) }))
+		hud.preparar_falas(opcoes, alvo)
 		return
 
 	hud.habilitar_vez(false)
@@ -204,13 +230,34 @@ func _falar(jogador_id: int, categoria: String, vars: Dictionary = {}) -> void:
 	if not _ias.has(jogador_id):
 		return
 	hud.mostrar_balao(jogador_id, DialogueLoader.get_random(_chave(jogador_id), categoria, vars))
-	# Falou, olha para o jogador enquanto o balão estiver no ar.
-	if _controladores.has(jogador_id):
-		_controladores[jogador_id].olhar_para(camera, HudController.DURACAO_BALAO)
+	_encarar(jogador_id)
+
+
+## Quem fala olha para o jogador, e a cena fecha um pouco em volta da fala.
+func _encarar(jogador_id: int) -> void:
+	if not _controladores.has(jogador_id):
+		return
+	_controladores[jogador_id].olhar_para(camera, HudController.DURACAO_BALAO)
+	efeitos.focar(HudController.DURACAO_BALAO)
+
+
+## Provocação do jogador (não gasta a jogada): sai no balão do personagem
+## dele e o alvo responde logo depois.
+func _ao_provocar(texto: String, alvo: int) -> void:
+	hud.mostrar_balao(JOGADOR_HUMANO, texto)
+	if _controladores.has(JOGADOR_HUMANO):
+		_controladores[JOGADOR_HUMANO].tocar("Apostar")
+	await get_tree().create_timer(HudController.DURACAO_BALAO * 0.55).timeout
+	if _ias.has(alvo):
+		_falar(alvo, "reacoes_provocacao")
 
 
 func _ao_humano_apostar(quantidade: int, face: int) -> void:
 	if jogo.fazer_aposta(JOGADOR_HUMANO, quantidade, face):
+		# O personagem do jogador aposta na mesa como qualquer outro.
+		if _controladores.has(JOGADOR_HUMANO):
+			_controladores[JOGADOR_HUMANO].apostar(false)
+		_encarar(JOGADOR_HUMANO)
 		_processar_turno()
 
 
@@ -227,6 +274,8 @@ func _ao_espiar(ativo: bool) -> void:
 
 func _ao_humano_dudo() -> void:
 	# A resolução dispara dudo_resolvido -> _ao_resolver_dudo.
+	if _controladores.has(JOGADOR_HUMANO):
+		_controladores[JOGADOR_HUMANO].tocar("Dudo")
 	if jogo.acusar_dudo(JOGADOR_HUMANO):
 		Sfx.tocar("Dudo")
 
@@ -248,6 +297,9 @@ func _ao_resolver_dudo(resultado: BetValidator.ResultadoDudo) -> void:
 	var vencedor := resultado.aposta.jogador if resultado.aposta_verdadeira else resultado.acusador
 	if _controladores.has(vencedor):
 		_controladores[vencedor].tocar("Comemorar")
+	# Quem errou fica em alerta: no Ciborgue isso acende o olho vermelho.
+	if _controladores.has(resultado.perdedor):
+		_controladores[resultado.perdedor].acender_olho()
 	_reagir_e_agendar(resultado)
 
 
@@ -270,6 +322,9 @@ func _castigar(jogador_id: int) -> void:
 	var controlador: NpcController = _controladores[jogador_id]
 	controlador.tocar("Castigo")
 	castigos.castigar(_chave(jogador_id), controlador)
+	# Se o castigado é o personagem do jogador, a tela sente junto.
+	if jogador_id == JOGADOR_HUMANO:
+		efeitos.castigo(_chave(jogador_id))
 
 
 func _ao_terminar(vencedor: int) -> void:

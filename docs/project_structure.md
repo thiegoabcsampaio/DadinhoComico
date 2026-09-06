@@ -115,3 +115,7 @@ DadinhoComico/
 - Autoload "Partida" (Scripts/Partida.gd): unico estado que atravessa cenas; Menu grava, Main le
 - Assentos em Main.tscn: Assento0 = fundo (sempre o personagem do jogador), 1 esquerda, 2 direita,
   3 frente-esquerda; os NPCs sao sorteados entre 1..3 e herdam a rotacao do assento
+- Scripts/EfeitoTela.gd (CanvasLayer no Main): efeitos de tela do castigo do jogador e o
+  foco (escurecer + zoom) durante as falas
+- Scripts/LogHistorico.gd: painel do historico da partida, aberto pelo icone no canto
+  superior esquerdo; vive so durante a partida
