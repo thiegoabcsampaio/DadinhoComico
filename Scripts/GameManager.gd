@@ -14,6 +14,11 @@ signal dudo_resolvido(resultado: BetValidator.ResultadoDudo)
 signal jogador_eliminado(jogador_id: int)
 signal jogo_terminou(vencedor: int)
 
+## Formato de decisão devolvido por políticas de NPC (NpcRandom, NpcAI):
+## { "acao": ACAO_APOSTAR, "quantidade": int, "face": int } ou { "acao": ACAO_DUDO }
+const ACAO_APOSTAR := "apostar"
+const ACAO_DUDO := "dudo"
+
 var estado: StateManager
 var turnos: TurnManager
 var dados: DiceSystem
@@ -22,6 +27,8 @@ var validador: BetValidator
 ## Última aposta da rodada (null logo após agitar os dados).
 var aposta_atual: BetValidator.Aposta = null
 var numero_rodada: int = 0
+## jogador_id -> nome de exibição (opcional; cai em "Jogador N").
+var nomes: Dictionary = {}
 
 ## Quem abre a próxima rodada (perdedor do último Dudo, se ainda estiver vivo).
 var _proximo_iniciante: int = -1
@@ -43,10 +50,11 @@ func _init() -> void:
 	validador = BetValidator.new()
 
 
-func iniciar_jogo(ids: Array[int], dados_por_jogador: int = DiceSystem.DADOS_INICIAIS, semente: int = 0) -> void:
+func iniciar_jogo(ids: Array[int], dados_por_jogador: int = DiceSystem.DADOS_INICIAIS, semente: int = 0, p_nomes: Dictionary = {}) -> void:
 	estado.reiniciar()
 	turnos.configurar(ids)
 	dados.configurar(ids, dados_por_jogador, semente)
+	nomes = p_nomes
 	numero_rodada = 0
 	aposta_atual = null
 	_proximo_iniciante = ids[0] if not ids.is_empty() else -1
@@ -95,8 +103,24 @@ func acusar_dudo(jogador_id: int) -> bool:
 	return true
 
 
+## Aplica uma decisão no formato de [const ACAO_APOSTAR] / [const ACAO_DUDO].
+func executar_decisao(jogador_id: int, decisao: Dictionary) -> bool:
+	match decisao.get("acao"):
+		ACAO_APOSTAR:
+			return fazer_aposta(jogador_id, decisao.get("quantidade", 0), decisao.get("face", 0))
+		ACAO_DUDO:
+			return acusar_dudo(jogador_id)
+		_:
+			push_warning("GameManager: decisão desconhecida %s" % decisao)
+			return false
+
+
 func jogador_atual() -> int:
 	return turnos.jogador_atual()
+
+
+func nome(jogador_id: int) -> String:
+	return nomes.get(jogador_id, "Jogador %d" % jogador_id)
 
 
 func ver_dados(jogador_id: int) -> Array[int]:

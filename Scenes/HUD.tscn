@@ -1,0 +1,378 @@
+[gd_scene load_steps=13 format=3]
+
+; HUD da mesa (Etapa 3). Estilo HQ: bordas grossas, cores saturadas.
+; Botões usam StyleBoxFlat por enquanto — os PNGs de Assets/UI entram
+; quando a arte definitiva estiver pronta.
+
+[ext_resource type="Script" path="res://Scripts/HudController.gd" id="1_hud"]
+
+[sub_resource type="StyleBoxFlat" id="botao_normal"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(1, 0.84, 0.2, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.1, 0.1, 0.1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="botao_hover"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(1, 0.92, 0.45, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.1, 0.1, 0.1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="botao_pressed"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.9, 0.62, 0.1, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.1, 0.1, 0.1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="botao_disabled"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.78, 0.78, 0.78, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.45, 0.45, 0.45, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="dudo_normal"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.9, 0.2, 0.2, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.1, 0.1, 0.1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="dudo_hover"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(1, 0.35, 0.35, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.1, 0.1, 0.1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="dudo_pressed"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.7, 0.1, 0.1, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.1, 0.1, 0.1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="painel"]
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
+bg_color = Color(0.98, 0.96, 0.9, 0.95)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.1, 0.1, 0.1, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxEmpty" id="vazio"]
+
+[sub_resource type="ButtonGroup" id="grupo_faces"]
+
+[sub_resource type="Theme" id="tema_hq"]
+Button/colors/font_color = Color(0.1, 0.1, 0.1, 1)
+Button/colors/font_disabled_color = Color(0.4, 0.4, 0.4, 1)
+Button/colors/font_focus_color = Color(0.1, 0.1, 0.1, 1)
+Button/colors/font_hover_color = Color(0.1, 0.1, 0.1, 1)
+Button/colors/font_hover_pressed_color = Color(0.1, 0.1, 0.1, 1)
+Button/colors/font_pressed_color = Color(0.1, 0.1, 0.1, 1)
+Button/font_sizes/font_size = 22
+Button/styles/disabled = SubResource("botao_disabled")
+Button/styles/focus = SubResource("vazio")
+Button/styles/hover = SubResource("botao_hover")
+Button/styles/hover_pressed = SubResource("botao_pressed")
+Button/styles/normal = SubResource("botao_normal")
+Button/styles/pressed = SubResource("botao_pressed")
+Label/colors/font_color = Color(1, 1, 1, 1)
+Label/colors/font_outline_color = Color(0.1, 0.1, 0.1, 1)
+Label/constants/outline_size = 6
+Label/font_sizes/font_size = 20
+PanelContainer/styles/panel = SubResource("painel")
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="Baloes" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Topo" type="MarginContainer" parent="."]
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 90.0
+grow_horizontal = 2
+mouse_filter = 2
+theme = SubResource("tema_hq")
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="Topo"]
+layout_mode = 2
+
+[node name="LabelInfo" type="Label" parent="Topo/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Rodada -"
+horizontal_alignment = 1
+
+[node name="LabelDadosMesa" type="Label" parent="Topo/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+
+[node name="LabelStatus" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -420.0
+offset_top = -256.0
+offset_right = 420.0
+offset_bottom = -212.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme = SubResource("tema_hq")
+theme_override_font_sizes/font_size = 26
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Rodape" type="MarginContainer" parent="."]
+layout_mode = 3
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -200.0
+grow_horizontal = 2
+grow_vertical = 0
+theme = SubResource("tema_hq")
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Centro" type="CenterContainer" parent="Rodape"]
+layout_mode = 2
+
+[node name="PainelAcoes" type="PanelContainer" parent="Rodape/Centro"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="Rodape/Centro/PainelAcoes"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="PainelDados" type="PanelContainer" parent="Rodape/Centro/PainelAcoes/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="VBoxDados" type="VBoxContainer" parent="Rodape/Centro/PainelAcoes/HBox/PainelDados"]
+layout_mode = 2
+alignment = 1
+
+[node name="LabelTituloDados" type="Label" parent="Rodape/Centro/PainelAcoes/HBox/PainelDados/VBoxDados"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Seus dados"
+horizontal_alignment = 1
+
+[node name="LabelMeusDados" type="Label" parent="Rodape/Centro/PainelAcoes/HBox/PainelDados/VBoxDados"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "-"
+horizontal_alignment = 1
+
+[node name="Seletor" type="VBoxContainer" parent="Rodape/Centro/PainelAcoes/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Quantidade" type="HBoxContainer" parent="Rodape/Centro/PainelAcoes/HBox/Seletor"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="LabelTituloQtd" type="Label" parent="Rodape/Centro/PainelAcoes/HBox/Seletor/Quantidade"]
+layout_mode = 2
+text = "Quantidade"
+
+[node name="BotaoMenos" type="Button" parent="Rodape/Centro/PainelAcoes/HBox/Seletor/Quantidade"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "-"
+
+[node name="LabelQuantidade" type="Label" parent="Rodape/Centro/PainelAcoes/HBox/Seletor/Quantidade"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "1"
+horizontal_alignment = 1
+
+[node name="BotaoMais" type="Button" parent="Rodape/Centro/PainelAcoes/HBox/Seletor/Quantidade"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "+"
+
+[node name="LinhaFace" type="HBoxContainer" parent="Rodape/Centro/PainelAcoes/HBox/Seletor"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="LabelTituloFace" type="Label" parent="Rodape/Centro/PainelAcoes/HBox/Seletor/LinhaFace"]
+layout_mode = 2
+text = "Face"
+
+[node name="Faces" type="HBoxContainer" parent="Rodape/Centro/PainelAcoes/HBox/Seletor/LinhaFace"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Face1" type="Button" parent="Rodape/Centro/PainelAcoes/HBox/Seletor/LinhaFace/Faces"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("grupo_faces")
+text = "1"
+
+[node name="Face2" type="Button" parent="Rodape/Centro/PainelAcoes/HBox/Seletor/LinhaFace/Faces"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("grupo_faces")
+text = "2"
+
+[node name="Face3" type="Button" parent="Rodape/Centro/PainelAcoes/HBox/Seletor/LinhaFace/Faces"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("grupo_faces")
+text = "3"
+
+[node name="Face4" type="Button" parent="Rodape/Centro/PainelAcoes/HBox/Seletor/LinhaFace/Faces"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("grupo_faces")
+text = "4"
+
+[node name="Face5" type="Button" parent="Rodape/Centro/PainelAcoes/HBox/Seletor/LinhaFace/Faces"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("grupo_faces")
+text = "5"
+
+[node name="Face6" type="Button" parent="Rodape/Centro/PainelAcoes/HBox/Seletor/LinhaFace/Faces"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("grupo_faces")
+text = "6"
+
+[node name="Botoes" type="VBoxContainer" parent="Rodape/Centro/PainelAcoes/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="BotaoApostar" type="Button" parent="Rodape/Centro/PainelAcoes/HBox/Botoes"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Apostar"
+
+[node name="BotaoDudo" type="Button" parent="Rodape/Centro/PainelAcoes/HBox/Botoes"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/hover = SubResource("dudo_hover")
+theme_override_styles/hover_pressed = SubResource("dudo_pressed")
+theme_override_styles/normal = SubResource("dudo_normal")
+theme_override_styles/pressed = SubResource("dudo_pressed")
+text = "Dudo!"
+
+[node name="BotaoVerDados" type="Button" parent="Rodape/Centro/PainelAcoes/HBox/Botoes"]
+unique_name_in_owner = true
+layout_mode = 2
+toggle_mode = true
+text = "Ver Dados"
