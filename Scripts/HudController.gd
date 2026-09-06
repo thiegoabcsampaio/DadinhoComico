@@ -152,23 +152,19 @@ func _criar_log() -> void:
 		_botao_log.add_theme_stylebox_override(estado, caixa)
 	add_child(_botao_log)
 
-	# Três pontinhos, para o botão ler como um balão de conversa.
-	var centro := CenterContainer.new()
-	centro.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_botao_log.add_child(centro)
-	centro.set_anchors_preset(Control.PRESET_FULL_RECT)
-	var pontos := HBoxContainer.new()
-	pontos.add_theme_constant_override("separation", 5)
+	# Três pontinhos de "conversa", desenhados como texto: containers dentro
+	# de Button não renderizavam os retângulos de forma confiável.
+	var pontos := Label.new()
+	pontos.text = "..."
+	pontos.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pontos.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	pontos.add_theme_font_size_override("font_size", 30)
+	pontos.add_theme_color_override("font_color", Color(0.2, 0.16, 0.12))
 	pontos.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	centro.add_child(pontos)
-	for i in 3:
-		var ponto := ColorRect.new()
-		ponto.color = Color(0.2, 0.16, 0.12)
-		ponto.custom_minimum_size = Vector2(7.0, 7.0)
-		ponto.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		ponto.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		ponto.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		pontos.add_child(ponto)
+	_botao_log.add_child(pontos)
+	pontos.set_anchors_preset(Control.PRESET_FULL_RECT)
+	# O "..." tipográfico senta na linha de base; sobe um pouco para centrar.
+	pontos.offset_top = -6.0
 
 	_botao_log.toggled.connect(func(aberto: bool) -> void: _log.visible = aberto)
 

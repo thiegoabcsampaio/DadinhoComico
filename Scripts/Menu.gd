@@ -9,6 +9,13 @@ extends Control
 const CENA_JOGO := "res://Scenes/Main.tscn"
 ## Ordem de exibição; as chaves são nós em Scenes/NPCs/ e Main.PERFIS.
 const PERSONAGENS := ["Apresentadora", "Bruxa", "Heroi", "Ciborgue"]
+## Cor do cartão de cada personagem (as mesmas do log em Main.CORES).
+const COR_CARTAO := {
+	"Apresentadora": Color(1.0, 0.55, 0.75),
+	"Bruxa": Color(0.62, 0.85, 0.45),
+	"Heroi": Color(1.0, 0.52, 0.45),
+	"Ciborgue": Color(0.66, 0.8, 1.0),
+}
 
 var _escolhido := ""
 
@@ -30,9 +37,37 @@ func _ready() -> void:
 		botao.text = DialogueLoader.get_text(nome.to_lower(), "nome")
 		botao.toggle_mode = true
 		botao.custom_minimum_size = Vector2(150.0, 64.0)
+		_estilizar(botao, COR_CARTAO.get(nome, Color(1.0, 0.84, 0.2)))
 		botao.pressed.connect(_escolher.bind(nome, botao))
 		_lista.add_child(botao)
+	_estilizar(_botao_jogar, Color(1.0, 0.84, 0.2))
 	_botao_jogar.pressed.connect(_jogar)
+
+
+## Mesmo estilo HQ da HUD: fundo saturado, borda grossa, cantos redondos.
+## O estado pressionado fica mais claro, para a escolha atual saltar.
+func _estilizar(botao: Button, cor: Color) -> void:
+	botao.add_theme_color_override("font_color", Color(0.12, 0.1, 0.08))
+	botao.add_theme_color_override("font_hover_color", Color(0.12, 0.1, 0.08))
+	botao.add_theme_color_override("font_pressed_color", Color(0.12, 0.1, 0.08))
+	botao.add_theme_color_override("font_disabled_color", Color(0.45, 0.42, 0.38))
+	botao.add_theme_font_size_override("font_size", 20)
+	for estado in ["normal", "hover", "pressed", "disabled"]:
+		var caixa := StyleBoxFlat.new()
+		match estado:
+			"hover":
+				caixa.bg_color = cor.lightened(0.18)
+			"pressed":
+				caixa.bg_color = cor.lightened(0.35)
+			"disabled":
+				caixa.bg_color = Color(0.8, 0.77, 0.7)
+			_:
+				caixa.bg_color = cor
+		caixa.border_color = Color(0.1, 0.1, 0.1)
+		caixa.set_border_width_all(4)
+		caixa.set_corner_radius_all(12)
+		caixa.set_content_margin_all(10.0)
+		botao.add_theme_stylebox_override(estado, caixa)
 
 
 func _escolher(nome: String, botao: Button) -> void:
