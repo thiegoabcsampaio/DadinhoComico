@@ -21,10 +21,15 @@ func _ready() -> void:
 		get_tree().quit()
 		return
 
+	# Modo "ver": 4º argumento é o personagem a examinar de perto. Ele senta
+	# sempre no assento do fundo, de frente para a câmera.
+	if modo == "ver" and args.size() > 3:
+		Partida.personagem = args[3]
+
 	var main: Node3D = load("res://Scenes/Main.tscn").instantiate()
 	# Semente fixa nos modos de comparação, para o sorteio de assentos não
 	# mudar entre uma captura e outra.
-	if modo.begins_with("rosto"):
+	if modo.begins_with("rosto") or modo == "ver":
 		main.semente = 7777
 	add_child(main)
 	for i in 10:
@@ -72,7 +77,7 @@ func _ready() -> void:
 				await get_tree().process_frame
 			for id in main._controladores:
 				print(_angulo_cabeca(main, id, "durante"))
-		"rosto", "rosto_olhar":
+		"ver", "rosto", "rosto_olhar":
 			# Câmera junto da mesa, de frente para os dois NPCs do fundo.
 			main.camera.position = Vector3(0.0, 1.45, 0.55)
 			main.camera.rotation_degrees = Vector3(-8.0, 0.0, 0.0)

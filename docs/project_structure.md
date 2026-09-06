@@ -130,3 +130,19 @@ DadinhoComico/
 - Sons de plateia (Assets/Audio/SFX/Plateia_*.wav): Murmurio toca em loop a partida
   inteira (loop ligado no .import), Ooh no Desconfio, Aplauso na revelacao e Festa no
   castigo; todos sintetizados por tools/GerarSfx.tscn
+
+## Roupas dos personagens (como fazer)
+
+As roupas NAO sao o corpo pintado: sao pecas de malha propria, criadas no
+Personagens.blend com tres funcoes auxiliares (dc.casca, dc.manga, dc.vestir):
+- casca(): primitivo sem tampas + modificador Solidify, para a peca ter
+  espessura e mostrar barra, gola e borda de abertura
+- manga(): tronco de cone entre dois pontos, tambem com espessura, para manga
+  e perna de calca; um torus no fim vira o punho
+- recortar(): remove faces por posicao, para abrir a frente da jaqueta, o
+  decote e deixar a capa so nas costas
+- vestir(): junta as pecas na malha rigada e pesa os vertices novos pelo osso
+  mais proximo, com mistura nas juntas; sem isso a roupa nao acompanha a animacao
+Depois de vestir, reexportar com dc.export_anim() para manter as 8 animacoes.
+Materiais por tecido (dc.tecido): couro rugosidade 0.32, jeans 0.95, cetim 0.16
+com leve metalico, la 0.94, algodao 0.72. E a rugosidade que separa os tecidos.
