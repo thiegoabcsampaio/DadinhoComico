@@ -3,19 +3,22 @@ extends Node
 ## Castigos cômicos estilo TV anos 90 (Etapa 6). Zero violência.
 ##
 ## [method castigar] recebe o personagem eliminado e monta o efeito em
-## cena com tweens, partículas e SFX. Cada NPC tem o seu, definido no
-## Game Bible; o humano leva torta na cara (overlay 2D). Todos os efeitos
-## são procedurais (sem assets extras) e se limpam sozinhos.
+## cena com tweens, partículas e SFX. Cada personagem tem o seu, definido no
+## Game Bible, e ele vale também quando o personagem é o do jogador. Todos os
+## efeitos são procedurais (sem assets extras) e se limpam sozinhos.
 
 ## Nave de papelão com o X gigante (Assets/Source/Personagens.blend).
 const CENA_NAVE := preload("res://Assets/Models/Nave.glb")
 const COR_GOSMA := Color(0.35, 0.9, 0.2)
-const COR_CREME := Color(1.0, 0.96, 0.85)
 
 
-## [chave]: seção do personagem em dialogues.json ("" para o humano).
-## [alvo]: nó do NPC na cena (ignorado para o humano).
+## [chave]: seção do personagem em dialogues.json.
+## [alvo]: nó do personagem na mesa (NPC ou o modelo do jogador).
+## Regra do projeto: todo personagem tem um castigo aqui e um efeito de
+## tela correspondente (rodada 3, item B1), sentido pelo jogador.
 func castigar(chave: String, alvo: Node3D) -> void:
+	if alvo == null:
+		return
 	match chave:
 		"apresentadora":
 			_nave_de_papelao(alvo)
@@ -26,7 +29,7 @@ func castigar(chave: String, alvo: Node3D) -> void:
 		"ciborgue":
 			_curto_circuito(alvo)
 		_:
-			_torta_na_cara()
+			push_warning("PunishmentSystem: sem castigo para '%s'" % chave)
 
 
 # ---------------------------------------------------------------- Apresentadora
@@ -169,56 +172,6 @@ func _curto_circuito(alvo: Node3D) -> void:
 		faiscas.queue_free()
 		luz.queue_free()
 		_esconder(alvo))
-
-
-# ----------------------------------------------------------------------- Humano
-## Torta na cara: creme espirra na tela e escorre.
-func _torta_na_cara() -> void:
-	Sfx.tocar("Castigo_Torta")
-	var camada := CanvasLayer.new()
-	camada.layer = 20
-	add_child(camada)
-	var torta := TortaOverlay.new()
-	camada.add_child(torta)
-	torta.set_anchors_preset(Control.PRESET_FULL_RECT)
-	torta.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	torta.pivot_offset = torta.get_viewport_rect().size * 0.5
-	torta.scale = Vector2.ONE * 0.2
-
-	var tween := create_tween()
-	tween.tween_property(torta, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_property(torta, "escorrimento", 60.0, 2.0)
-	tween.parallel().tween_property(torta, "modulate:a", 0.0, 1.2).set_delay(1.2)
-	tween.tween_callback(camada.queue_free)
-
-
-## Overlay 2D com o splat de creme (desenhado, sem textura).
-class TortaOverlay:
-	extends Control
-	var escorrimento := 0.0:
-		set(v):
-			escorrimento = v
-			queue_redraw()
-	var _manchas: Array = []
-
-	func _ready() -> void:
-		var centro := get_viewport_rect().size * 0.5
-		var rng := RandomNumberGenerator.new()
-		rng.randomize()
-		_manchas.append([centro, 130.0])
-		for i in 12:
-			var ang := rng.randf_range(0.0, TAU)
-			var dist := rng.randf_range(110.0, 240.0)
-			_manchas.append([centro + Vector2.from_angle(ang) * dist, rng.randf_range(22.0, 60.0)])
-		queue_redraw()
-
-	func _draw() -> void:
-		for m in _manchas:
-			var raio: float = m[1]
-			var pos: Vector2 = m[0] + Vector2(0.0, escorrimento * (raio / 130.0))
-			draw_circle(pos, raio, COR_CREME)
-			draw_circle(pos + Vector2(-raio * 0.25, -raio * 0.25), raio * 0.35, Color(1.0, 1.0, 1.0, 0.6))
-			draw_circle(pos, raio, Color(0.85, 0.6, 0.45), false, 5.0)
 
 
 # -------------------------------------------------------------------- Utilidades

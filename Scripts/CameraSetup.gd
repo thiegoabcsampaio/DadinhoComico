@@ -6,14 +6,17 @@ extends Camera3D
 ## Não recebe nenhum input do jogador e não executa nenhum movimento.
 
 # Posição fixa da câmera: acima e um pouco à frente da mesa.
-const CAMERA_POSITION := Vector3(0.0, 2.3, 2.5)
+const CAMERA_POSITION := Vector3(0.0, 2.0, 2.2)
 # Inclinação para baixo em aproximadamente 45°.
-const CAMERA_PITCH_DEGREES := -34.0
+const CAMERA_PITCH_DEGREES := -30.0
+# Campo de visao vertical menor: aproxima mesa e personagens.
+const CAMERA_FOV := 58.0
 
 
 func _ready() -> void:
 	position = CAMERA_POSITION
 	rotation_degrees = Vector3(CAMERA_PITCH_DEGREES, 0.0, 0.0)
+	fov = CAMERA_FOV
 	current = true
 
 	# Garante que nada nesta câmera processe frames ou input.

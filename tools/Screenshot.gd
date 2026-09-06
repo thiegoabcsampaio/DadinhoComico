@@ -3,7 +3,7 @@ extends Node
 ## um PNG da câmera fixa. Uso:
 ##   godot --path . tools/Screenshot.tscn -- <png> [modo] [frames]
 ## modo: "jogo" (padrão), "revelacao" (copos levantados com faces),
-## "castigos" (dispara o castigo dos 4 NPCs), "torta" (castigo do humano)
+## "castigos" (dispara o castigo dos 4 NPCs)
 ## ou "espiar" (copo do jogador inclinado mostrando os dados).
 
 func _ready() -> void:
@@ -11,6 +11,15 @@ func _ready() -> void:
 	var destino: String = args[0] if args.size() > 0 else "screenshot.png"
 	var modo: String = args[1] if args.size() > 1 else "jogo"
 	var frames: int = int(args[2]) if args.size() > 2 else 30
+
+	if modo == "menu":
+		add_child(load("res://Scenes/Menu.tscn").instantiate())
+		for i in frames:
+			await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png(destino)
+		print("screenshot salvo em ", destino)
+		get_tree().quit()
+		return
 
 	var main: Node3D = load("res://Scenes/Main.tscn").instantiate()
 	# Semente fixa nos modos de comparação, para o sorteio de assentos não
@@ -27,8 +36,6 @@ func _ready() -> void:
 			main.mesa.revelar({ 0: [1, 2, 3], 1: [4, 5, 6], 2: [6, 6], 3: [1], 4: [2, 3, 5] })
 			for id in main._controladores:
 				main._castigar(id)
-		"torta":
-			main._castigar(main.JOGADOR_HUMANO)
 		"espiar":
 			main.mesa.espiar(main.JOGADOR_HUMANO, [2, 5, 6], true)
 		"zoom":

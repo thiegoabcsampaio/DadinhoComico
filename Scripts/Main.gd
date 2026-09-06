@@ -51,13 +51,15 @@ func _ready() -> void:
 		_rng.randomize()
 	_sortear_assentos()
 
-	var ids: Array[int] = [JOGADOR_HUMANO]
-	var nomes := { JOGADOR_HUMANO: DialogueLoader.get_text("ui", "nome_jogador") }
+	var ids: Array[int] = []
+	var nomes := {}
 	for assento in _controladores:
 		var perfil: NpcProfile = PERFIS[_controladores[assento].name]
 		ids.append(assento)
 		nomes[assento] = perfil.nome
-		_ias[assento] = NpcAI.new(perfil, semente + assento if semente != 0 else 0)
+		# O jogador controla o próprio personagem: sem IA para ele.
+		if assento != JOGADOR_HUMANO:
+			_ias[assento] = NpcAI.new(perfil, semente + assento if semente != 0 else 0)
 	ids.sort()
 
 	jogo.iniciar_jogo(ids, DiceSystem.DADOS_INICIAIS, semente, nomes)
@@ -86,37 +88,56 @@ func _exit_tree() -> void:
 	Engine.time_scale = 1.0
 
 
-## Embaralha os 4 NPCs entre os assentos 1..4 no início da partida, para
-## que a mesa não seja sempre a mesma. A rotação que vira o personagem
-## para o centro está no nó do NPC, então ela pertence ao assento: o
-## transform de cada assento é guardado antes e reaplicado ao novo dono.
-## O assento 0 é sempre o humano e fica de fora. Preenche [_controladores].
+## Distribui os 4 personagens pelos assentos no início da partida. O
+## personagem escolhido no menu (Partida.personagem) senta sempre no
+## assento 0, o do fundo, de frente para a câmera; os outros três são
+## embaralhados entre os assentos 1..3. A rotação que vira o personagem
+## para o centro está no nó do personagem, então ela pertence ao assento:
+## o transform de cada assento é guardado antes e reaplicado ao novo dono.
+## Preenche [_controladores] (0 = modelo do jogador, sem NpcAI).
 func _sortear_assentos() -> void:
 	var npcs: Array[NpcController] = []
-	## nome do assento -> transform do NPC que estava nele
+	var jogador: NpcController = null
+	## nome do assento -> transform do personagem que estava nele
 	var poses := {}
 	for assento in assentos.get_children():
 		for filho in assento.get_children():
 			if filho is NpcController:
-				npcs.append(filho)
 				poses[assento.name] = filho.transform
+				if filho.name == Partida.personagem:
+					jogador = filho
+				else:
+					npcs.append(filho)
+	if jogador == null:
+		push_warning("Main: personagem '%s' não está na mesa; usando o primeiro" % Partida.personagem)
+		jogador = npcs.pop_front()
 
 	# Fisher-Yates com o RNG local, para a semente continuar reproduzindo
-	# a mesma partida (dados, decisões e agora também os lugares).
+	# a mesma partida (dados, decisões e também os lugares).
 	for i in range(npcs.size() - 1, 0, -1):
 		var j := _rng.randi_range(0, i)
 		var troca := npcs[i]
 		npcs[i] = npcs[j]
 		npcs[j] = troca
 
-	for i in npcs.size():
-		var npc := npcs[i]
-		var assento: Node3D = assentos.get_node("Assento%d" % (i + 1))
-		if npc.get_parent() != assento:
-			npc.get_parent().remove_child(npc)
-			assento.add_child(npc)
-		npc.transform = poses[assento.name]
-		_controladores[i + 1] = npc
+	var ordem: Array[NpcController] = [jogador]
+	ordem.append_array(npcs)
+	for i in ordem.size():
+		var personagem := ordem[i]
+		var assento: Node3D = assentos.get_node("Assento%d" % i)
+		if personagem.get_parent() != assento:
+			personagem.get_parent().remove_child(personagem)
+			assento.add_child(personagem)
+		personagem.transform = poses[assento.name]
+		_controladores[i] = personagem
+
+
+## Seção do personagem em dialogues.json, pelo modelo sentado no assento.
+func _chave(jogador_id: int) -> String:
+	if not _controladores.has(jogador_id):
+		return ""
+	var perfil: NpcProfile = PERFIS[_controladores[jogador_id].name]
+	return perfil.chave_dialogo
 
 
 ## Modo espectador: os timers de jogada/rodada respeitam Engine.time_scale,
@@ -178,10 +199,11 @@ func _animar_decisao(id: int, decisao: Dictionary) -> void:
 
 ## Balão com uma fala aleatória do personagem naquela categoria.
 func _falar(jogador_id: int, categoria: String, vars: Dictionary = {}) -> void:
+	# O jogador fala pela HUD (HudController) e pelas opções de fala (B4);
+	# aqui só os NPCs.
 	if not _ias.has(jogador_id):
 		return
-	var chave: String = _ias[jogador_id].perfil.chave_dialogo
-	hud.mostrar_balao(jogador_id, DialogueLoader.get_random(chave, categoria, vars))
+	hud.mostrar_balao(jogador_id, DialogueLoader.get_random(_chave(jogador_id), categoria, vars))
 	# Falou, olha para o jogador enquanto o balão estiver no ar.
 	if _controladores.has(jogador_id):
 		_controladores[jogador_id].olhar_para(camera, HudController.DURACAO_BALAO)
@@ -239,14 +261,15 @@ func _reagir_e_agendar(resultado: BetValidator.ResultadoDudo) -> void:
 	_iniciar_rodada()
 
 
-## Castigo cômico do eliminado (PunishmentSystem); o humano leva torta.
+## Castigo cômico do eliminado no modelo dele (PunishmentSystem). Vale
+## também para o jogador: o personagem escolhido sofre o próprio castigo
+## na mesa (e o efeito de tela dele, item B1 da rodada 3).
 func _castigar(jogador_id: int) -> void:
-	if _controladores.has(jogador_id):
-		var controlador: NpcController = _controladores[jogador_id]
-		controlador.tocar("Castigo")
-		castigos.castigar(_ias[jogador_id].perfil.chave_dialogo, controlador)
-	else:
-		castigos.castigar("", null)
+	if not _controladores.has(jogador_id):
+		return
+	var controlador: NpcController = _controladores[jogador_id]
+	controlador.tocar("Castigo")
+	castigos.castigar(_chave(jogador_id), controlador)
 
 
 func _ao_terminar(vencedor: int) -> void:

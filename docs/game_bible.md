@@ -17,7 +17,8 @@
 
 ## Camera e Controles
 
-- Camera 100% estatica, visao fixa na mesa (jogador sentado)
+- Camera 100% estatica, visao fixa na mesa (visao de espectador, atras do lado vazio)
+- O jogador ve o proprio personagem no fundo da mesa; baloes, animacoes e castigo dele saem desse modelo 3D
 - Sem movimentacao de camera pelo jogador
 - Interacao exclusivamente via UI:
   - Cliques em botoes
@@ -50,7 +51,8 @@ Ciborgue (parodia Exterminador):
 
 ## Regras do Liar's Dice
 
-- 5 jogadores (1 humano + 4 NPCs)
+- 4 personagens na mesa: o jogador escolhe um deles no menu e os outros 3 sao NPCs
+- O personagem do jogador senta sempre no assento do fundo, de frente para a camera
 - Cada jogador tem 1 copo com 3 dados
 - Jogador humano eliminado vira espectador: pode acelerar a partida (3x) ou encerrar e iniciar um novo jogo
 - Inicio da rodada: todos agitam e escondem os dados
@@ -80,7 +82,12 @@ Ciborgue (parodia Exterminador):
   (NpcAI.blefe_arriscado), com chance frequencia_tells do perfil; sao 3 animacoes
   embarcadas no .glb: Tell_Olhar, Tell_Cocar, Tell_Bater
 - Castigos: Apresentadora some numa nave de papelao; Bruxa vira gosma e some em fumaca;
-  Heroi encolhe com a pilula; Ciborgue entra em curto e desliga; humano leva torta na cara
+  Heroi encolhe com a pilula; Ciborgue entra em curto e desliga
+- Regra: todo personagem nasce com um castigo no modelo 3D E um efeito de tela proprio
+  (cor, tremor, luz), sentido pelo jogador quando o personagem dele e castigado. Sem torta.
+  Apresentadora: flash branco, zoom-out e tremor de decolagem. Bruxa: tela verde que ondula.
+  Heroi: campo de visao abre e volta com quique. Ciborgue: glitch vermelho, tremor, dessaturacao
+- Olho robotico do Ciborgue e preto; acende vermelho quando ele perde um dado
 
 ## RETOMADA
 
@@ -100,3 +107,13 @@ Proximo passo:
 
 Cole este bloco no inicio da proxima sessao.
 ---
+
+## HUD (rodada 3)
+
+- Falas dinamicas: no turno do jogador, botao Falar com 3 provocacoes do proprio personagem
+  (dialogues.json, "provocacoes"); o NPC alvo responde ("reacoes_provocacao"); nao gasta a jogada
+- Baloes nunca se sobrepoem (fila ou deslocamento)
+- Log de historico a esquerda, estilo app de mensagens, com falas, apostas, Desconfio, revelacoes
+  e castigos; existe so durante a partida e reinicia no Novo jogo
+- Resultado da revelacao aparece tambem num balao do "narrador", no centro da mesa
+- Ver Dados: os dados voam do copo para o painel e FICAM la (nao viram numeros)

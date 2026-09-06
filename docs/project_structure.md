@@ -53,7 +53,7 @@ DadinhoComico/
 │   ├── Main.tscn
 │   ├── Mesa.tscn
 │   ├── HUD.tscn
-│   ├── Menu.tscn
+│   ├── Menu.tscn            (escolha de personagem; cena inicial do projeto)
 │   └── NPCs/
 │       ├── Apresentadora.tscn
 │       ├── Bruxa.tscn
@@ -61,6 +61,8 @@ DadinhoComico/
 │       └── Ciborgue.tscn
 ├── Scripts/
 │   ├── GameManager.gd
+│   ├── Partida.gd           (autoload: personagem escolhido, atravessa cenas)
+│   ├── Menu.gd
 │   ├── StateManager.gd
 │   ├── TurnManager.gd
 │   ├── DiceSystem.gd
@@ -110,3 +112,6 @@ DadinhoComico/
 - Perfis de NPC como Resource (.tres) com campos: nome, agressividade, cautela, frequencia_tells- Modelos 3D: materiais so com cor base (sem texturas) enquanto o estilo PS2 nao pedir; o .blend fonte fica em Assets/Source/
 - Personagens olham para +Z no proprio .glb; a rotacao para o centro da mesa fica no assento em Main.tscn
 - Escala: tampo da mesa a 0.75 m, cabeca dos NPCs a ~1.2 m, dados de 4 cm
+- Autoload "Partida" (Scripts/Partida.gd): unico estado que atravessa cenas; Menu grava, Main le
+- Assentos em Main.tscn: Assento0 = fundo (sempre o personagem do jogador), 1 esquerda, 2 direita,
+  3 frente-esquerda; os NPCs sao sorteados entre 1..3 e herdam a rotacao do assento

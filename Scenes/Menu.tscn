@@ -1,0 +1,96 @@
+[gd_scene load_steps=4 format=3]
+
+; Tela inicial (esqueleto, rodada 3). Menu.gd preenche os botões de
+; personagem e a frase de apresentação a partir de dialogues.json.
+; O Opus veste esta tela no item B1 (cartões, retratos, animação).
+
+[ext_resource type="Script" path="res://Scripts/Menu.gd" id="1_menu"]
+
+[sub_resource type="StyleBoxFlat" id="painel"]
+content_margin_left = 32.0
+content_margin_top = 24.0
+content_margin_right = 32.0
+content_margin_bottom = 24.0
+bg_color = Color(0.98, 0.95, 0.85, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.1, 0.1, 0.1, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="fundo"]
+bg_color = Color(0.16, 0.12, 0.1, 1)
+
+[node name="Menu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Fundo" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("fundo")
+
+[node name="Centro" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Painel" type="PanelContainer" parent="Centro"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("painel")
+
+[node name="VBox" type="VBoxContainer" parent="Centro/Painel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Titulo" type="Label" parent="Centro/Painel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+horizontal_alignment = 1
+
+[node name="Subtitulo" type="Label" parent="Centro/Painel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.25, 0.2, 0.15, 1)
+horizontal_alignment = 1
+
+[node name="Lista" type="HBoxContainer" parent="Centro/Painel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Apresentacao" type="Label" parent="Centro/Painel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(620, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.2, 0.15, 0.1, 1)
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="BotaoJogar" type="Button" parent="Centro/Painel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
