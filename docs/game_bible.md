@@ -62,6 +62,11 @@ Ciborgue (parodia Exterminador):
 - Resolucao: todos revelam os dados
   - Se a aposta era verdadeira: acusador perde 1 dado
   - Se a aposta era falsa: apostador perde 1 dado
+- Modos de jogo, escolhidos no menu:
+  - Dadinho: cada dado vale so a propria face (padrao)
+  - Dados mentirosos: o as (face 1) e curinga e conta para qualquer face pedida.
+    Quase dobra a chance de cada pedido ser verdadeiro, entao os pedidos sobem
+    mais rapido e o Desconfio fica mais arriscado
 - Jogador sem dados e eliminado (recebe castigo comico)
 - Ultimo jogador vence
 

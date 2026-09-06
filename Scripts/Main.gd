@@ -77,6 +77,8 @@ func _ready() -> void:
 			_ias[assento] = ia
 	ids.sort()
 
+	# Modo escolhido no menu: no "Dados mentirosos" o ás vale por qualquer face.
+	jogo.validador.ases_curinga = Partida.ases_curinga
 	jogo.iniciar_jogo(ids, DiceSystem.DADOS_INICIAIS, semente, nomes)
 
 	efeitos.configurar(camera, ambiente.environment)
@@ -89,6 +91,8 @@ func _ready() -> void:
 	for id in ids:
 		hud.cores_jogadores[id] = CORES.get(_controladores[id].name, Color.WHITE)
 	hud.configurar(jogo, JOGADOR_HUMANO, camera, ancoras)
+	hud.registrar_evento(DialogueLoader.get_fmt("ui", "log_modo",
+		[DialogueLoader.get_text("ui", "modo_mentirosos" if Partida.ases_curinga else "modo_dadinho")]))
 	for id in _ias:
 		hud.registrar_evento(DialogueLoader.get_fmt("ui", "log_nivel",
 			[jogo.nome(id), _ias[id].nivel, NpcAI.NIVEIS]))

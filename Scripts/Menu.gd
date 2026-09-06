@@ -32,6 +32,9 @@ var _musica: AudioStreamPlayer
 @onready var _apresentacao: Label = %Apresentacao
 @onready var _botao_jogar: Button = %BotaoJogar
 
+## Seletor de modo, montado por código logo abaixo dos personagens.
+var _dica_modo: Label
+
 
 func _ready() -> void:
 	_titulo.text = DialogueLoader.get_text("ui", "titulo_menu")
@@ -47,6 +50,7 @@ func _ready() -> void:
 		_estilizar(botao, COR_CARTAO.get(nome, Color(1.0, 0.84, 0.2)))
 		botao.pressed.connect(_escolher.bind(nome, botao))
 		_lista.add_child(botao)
+	_criar_modos()
 	_estilizar(_botao_jogar, Color(1.0, 0.84, 0.2))
 	_botao_jogar.pressed.connect(_jogar)
 
@@ -81,6 +85,53 @@ func _estilizar(botao: Button, cor: Color) -> void:
 		caixa.set_corner_radius_all(12)
 		caixa.set_content_margin_all(10.0)
 		botao.add_theme_stylebox_override(estado, caixa)
+
+
+## Seletor de modo: duas opções exclusivas, com uma linha explicando o que
+## muda. Fica entre os personagens e o botão Jogar.
+func _criar_modos() -> void:
+	var coluna := _apresentacao.get_parent() as VBoxContainer
+	var indice := _apresentacao.get_index() + 1
+
+	var linha := HBoxContainer.new()
+	linha.alignment = BoxContainer.ALIGNMENT_CENTER
+	linha.add_theme_constant_override("separation", 24)
+	coluna.add_child(linha)
+	coluna.move_child(linha, indice)
+
+	var rotulo := Label.new()
+	rotulo.text = DialogueLoader.get_text("ui", "titulo_modo")
+	rotulo.add_theme_font_size_override("font_size", 20)
+	rotulo.add_theme_color_override("font_color", Color(0.25, 0.2, 0.15))
+	linha.add_child(rotulo)
+
+	var grupo := ButtonGroup.new()
+	for curinga in [false, true]:
+		var opcao := CheckBox.new()
+		opcao.text = DialogueLoader.get_text("ui", "modo_mentirosos" if curinga else "modo_dadinho")
+		opcao.button_group = grupo
+		opcao.button_pressed = curinga == Partida.ases_curinga
+		opcao.add_theme_font_size_override("font_size", 20)
+		opcao.add_theme_color_override("font_color", Color(0.15, 0.12, 0.1))
+		opcao.add_theme_color_override("font_hover_color", Color(0.15, 0.12, 0.1))
+		opcao.add_theme_color_override("font_pressed_color", Color(0.15, 0.12, 0.1))
+		linha.add_child(opcao)
+		opcao.pressed.connect(_definir_modo.bind(curinga))
+
+	_dica_modo = Label.new()
+	_dica_modo.add_theme_font_size_override("font_size", 16)
+	_dica_modo.add_theme_color_override("font_color", Color(0.4, 0.33, 0.25))
+	_dica_modo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	coluna.add_child(_dica_modo)
+	coluna.move_child(_dica_modo, indice + 1)
+	_definir_modo(Partida.ases_curinga)
+
+
+func _definir_modo(curinga: bool) -> void:
+	Partida.ases_curinga = curinga
+	if _dica_modo != null:
+		_dica_modo.text = DialogueLoader.get_text("ui",
+			"modo_mentirosos_dica" if curinga else "modo_dadinho_dica")
 
 
 func _escolher(nome: String, botao: Button) -> void:
