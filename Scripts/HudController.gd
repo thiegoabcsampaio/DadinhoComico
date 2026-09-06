@@ -9,6 +9,10 @@ extends CanvasLayer
 
 signal aposta_solicitada(quantidade: int, face: int)
 signal dudo_solicitado()
+## Modo espectador (humano eliminado): acelerar a partida ligado/desligado.
+signal acelerar_alternado(ativo: bool)
+## Encerrar a partida atual / começar um novo jogo.
+signal encerrar_solicitado()
 
 const CENA_BALAO := preload("res://Scenes/BalaoDialogo.tscn")
 const DURACAO_BALAO := 2.5
@@ -28,6 +32,10 @@ const DURACAO_BALAO := 2.5
 @onready var _label_titulo_dados: Label = %LabelTituloDados
 @onready var _label_titulo_qtd: Label = %LabelTituloQtd
 @onready var _label_titulo_face: Label = %LabelTituloFace
+@onready var _painel_acoes: PanelContainer = %PainelAcoes
+@onready var _painel_espectador: PanelContainer = %PainelEspectador
+@onready var _botao_acelerar: Button = %BotaoAcelerar
+@onready var _botao_encerrar: Button = %BotaoEncerrar
 @onready var _camada_baloes: Control = %Baloes
 
 var _jogo: GameManager
@@ -52,6 +60,12 @@ func _ready() -> void:
 	_botao_apostar.text = _t("botao_apostar")
 	_botao_dudo.text = _t("botao_dudo")
 	_botao_ver_dados.text = _t("botao_ver_dados")
+	_botao_acelerar.text = _t("botao_acelerar")
+	_botao_encerrar.text = _t("botao_encerrar")
+
+	_botao_acelerar.toggled.connect(func(ativo: bool) -> void: acelerar_alternado.emit(ativo))
+	_botao_encerrar.pressed.connect(func() -> void: encerrar_solicitado.emit())
+	_painel_espectador.visible = false
 
 	_botao_menos.pressed.connect(func() -> void: _definir_quantidade(_quantidade - 1))
 	_botao_mais.pressed.connect(func() -> void: _definir_quantidade(_quantidade + 1))
@@ -187,8 +201,25 @@ func _ao_resolver_dudo(r: BetValidator.ResultadoDudo) -> void:
 func _ao_eliminar(jogador_id: int) -> void:
 	_label_status.text = DialogueLoader.get_fmt("ui", "eliminado", [_jogo.nome(jogador_id)])
 	_atualizar_info()
+	if jogador_id == _humano:
+		_entrar_modo_espectador()
+
+
+## Humano fora: some o painel de jogada, aparecem Acelerar / Encerrar.
+func _entrar_modo_espectador() -> void:
+	habilitar_vez(false)
+	_painel_acoes.visible = false
+	_painel_espectador.visible = true
+	_botao_acelerar.visible = true
+	_botao_acelerar.button_pressed = false
 
 
 func _ao_terminar(vencedor: int) -> void:
 	_label_status.text = DialogueLoader.get_fmt("ui", "vencedor", [_jogo.nome(vencedor)])
 	habilitar_vez(false)
+	# Fim de jogo: só resta começar outro.
+	_painel_acoes.visible = false
+	_painel_espectador.visible = true
+	_botao_acelerar.button_pressed = false
+	_botao_acelerar.visible = false
+	_botao_encerrar.text = _t("botao_novo_jogo")

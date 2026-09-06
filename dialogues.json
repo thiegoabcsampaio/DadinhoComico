@@ -19,7 +19,10 @@
 		"titulo_quantidade": "Quantidade",
 		"titulo_face": "Face",
 		"titulo_seus_dados": "Seus dados",
-		"info_inicial": "Rodada -"
+		"info_inicial": "Rodada -",
+		"botao_acelerar": "Acelerar 3x",
+		"botao_encerrar": "Encerrar",
+		"botao_novo_jogo": "Novo jogo"
 	},
 
 	"apresentadora": {

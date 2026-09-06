@@ -23,6 +23,8 @@ const PERFIS := {
 @export var atraso_entre_rodadas: float = 4.5
 ## 0 = aleatório. Outro valor reproduz a mesma partida (dados e NPCs).
 @export var semente: int = 0
+## Multiplicador de velocidade do modo espectador (humano eliminado).
+@export var aceleracao_espectador: float = 3.0
 
 @onready var jogo: GameManager = $GameManager
 @onready var hud: HudController = $HUD
@@ -52,11 +54,31 @@ func _ready() -> void:
 
 	hud.aposta_solicitada.connect(_ao_humano_apostar)
 	hud.dudo_solicitado.connect(_ao_humano_dudo)
+	hud.acelerar_alternado.connect(_ao_alternar_aceleracao)
+	hud.encerrar_solicitado.connect(_reiniciar_partida)
 	jogo.aposta_feita.connect(_ao_apostar)
 	jogo.dudo_declarado.connect(_ao_declarar_dudo)
 	jogo.dudo_resolvido.connect(_ao_resolver_dudo)
+	jogo.jogo_terminou.connect(func(_vencedor: int) -> void: Engine.time_scale = 1.0)
 
 	_iniciar_rodada()
+
+
+func _exit_tree() -> void:
+	# Nunca deixar a aceleração vazar para outra cena.
+	Engine.time_scale = 1.0
+
+
+## Modo espectador: os timers de jogada/rodada respeitam Engine.time_scale,
+## então acelerar a engine acelera a partida inteira (balões inclusive).
+func _ao_alternar_aceleracao(ativo: bool) -> void:
+	Engine.time_scale = aceleracao_espectador if ativo else 1.0
+
+
+## Encerra a partida atual e começa outra do zero (recarrega a cena).
+func _reiniciar_partida() -> void:
+	Engine.time_scale = 1.0
+	get_tree().reload_current_scene()
 
 
 func _iniciar_rodada() -> void:

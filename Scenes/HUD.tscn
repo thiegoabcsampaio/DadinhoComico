@@ -372,3 +372,29 @@ theme_override_styles/pressed = SubResource("dudo_pressed")
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
+
+[node name="PainelEspectador" type="PanelContainer" parent="Rodape/Centro"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="HBoxEspectador" type="HBoxContainer" parent="Rodape/Centro/PainelEspectador"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="BotaoAcelerar" type="Button" parent="Rodape/Centro/PainelEspectador/HBoxEspectador"]
+unique_name_in_owner = true
+layout_mode = 2
+toggle_mode = true
+
+[node name="BotaoEncerrar" type="Button" parent="Rodape/Centro/PainelEspectador/HBoxEspectador"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/hover = SubResource("dudo_hover")
+theme_override_styles/hover_pressed = SubResource("dudo_pressed")
+theme_override_styles/normal = SubResource("dudo_normal")
+theme_override_styles/pressed = SubResource("dudo_pressed")

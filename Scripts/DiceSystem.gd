@@ -12,7 +12,7 @@ signal dado_removido(jogador_id: int, restantes: int)
 
 const FACE_MIN := 1
 const FACE_MAX := 6
-const DADOS_INICIAIS := 5
+const DADOS_INICIAIS := 3
 
 ## jogador_id -> Array[int] com as faces atuais.
 var _copos: Dictionary = {}

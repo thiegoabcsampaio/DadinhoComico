@@ -51,7 +51,8 @@ Ciborgue (parodia Exterminador):
 ## Regras do Liar's Dice
 
 - 5 jogadores (1 humano + 4 NPCs)
-- Cada jogador tem 1 copo com 5 dados
+- Cada jogador tem 1 copo com 3 dados
+- Jogador humano eliminado vira espectador: pode acelerar a partida (3x) ou encerrar e iniciar um novo jogo
 - Inicio da rodada: todos agitam e escondem os dados
 - Jogadores fazem apostas crescentes sobre a quantidade total de uma face entre todos os copos
 - Apostas devem ser sempre maiores que a anterior (quantidade ou face)

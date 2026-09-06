@@ -16,7 +16,7 @@ Agentes: [F] [B] [G]
 Acoes:
 - Criar projeto Godot com Renderer Compatibility
 - Configurar camera 3D estatica (posicao fixa, sem input do jogador)
-- Gerar via Blender MCP: mesa, 5 copos, 25 dados (5 por copo)
+- Gerar via Blender MCP: mesa, 5 copos, 15 dados (3 por copo)
 - Exportar assets como .glb para Assets/Models/
 - Montar Mesa.tscn com assets posicionados
 - Iluminacao direcional estilo estudio de TV
@@ -30,7 +30,7 @@ Outputs esperados:
 - Assets/Models/Copo.glb
 - Assets/Models/Dado.glb
 
-Criterio de conclusao: cena roda no Godot, camera fixa mostra a mesa com 5 copos e dados
+Criterio de conclusao: cena roda no Godot, camera fixa mostra a mesa com 5 copos e 15 dados
 
 ---
 
