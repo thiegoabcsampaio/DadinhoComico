@@ -71,7 +71,10 @@ func _ready() -> void:
 		nomes[assento] = perfil.nome
 		# O jogador controla o próprio personagem: sem IA para ele.
 		if assento != JOGADOR_HUMANO:
-			_ias[assento] = NpcAI.new(perfil, semente + assento if semente != 0 else 0)
+			var ia := NpcAI.new(perfil, semente + assento if semente != 0 else 0)
+			# Cada NPC entra com um nível sorteado: a mesa nunca é a mesma.
+			ia.nivel = _rng.randi_range(1, NpcAI.NIVEIS)
+			_ias[assento] = ia
 	ids.sort()
 
 	jogo.iniciar_jogo(ids, DiceSystem.DADOS_INICIAIS, semente, nomes)
@@ -86,6 +89,9 @@ func _ready() -> void:
 	for id in ids:
 		hud.cores_jogadores[id] = CORES.get(_controladores[id].name, Color.WHITE)
 	hud.configurar(jogo, JOGADOR_HUMANO, camera, ancoras)
+	for id in _ias:
+		hud.registrar_evento(DialogueLoader.get_fmt("ui", "log_nivel",
+			[jogo.nome(id), _ias[id].nivel, NpcAI.NIVEIS]))
 
 	hud.aposta_solicitada.connect(_ao_humano_apostar)
 	hud.dudo_solicitado.connect(_ao_humano_dudo)
@@ -345,5 +351,7 @@ func _castigar(jogador_id: int) -> void:
 func _ao_terminar(vencedor: int) -> void:
 	Engine.time_scale = 1.0
 	Sfx.tocar("Vitoria")
+	# Sem os copos na frente, a comemoração do vencedor fica limpa.
+	mesa.recolher_copos()
 	if _controladores.has(vencedor):
 		_controladores[vencedor].tocar("Comemorar")

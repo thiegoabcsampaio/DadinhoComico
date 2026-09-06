@@ -42,19 +42,19 @@ show de auditorio, em dialogues.json (ui.hora_castigo).
       personagem no fundo da mesa (o jogador olha para os botoes, nao para o
       proprio boneco). Ancorar acima do PainelAcoes.
 - [x] B3. LINGUAGEM: aplicar a tabela acima em dialogues.json e nos rotulos.
-- [~] B4. HUD, quatro ajustes (3 de 4 prontos):
+- [x] B4. HUD, quatro ajustes:
       - Ultimo pedido em destaque logo abaixo de "Sua vez!", em cor que nao
         seja branca, para o jogador saber o que precisa superar.
       - Dados de "Ver Dados": brancos com pintas pretas (cara de dado, nao
         botao amarelo), sempre dentro do painel, na mesma posicao a cada
         clique. Hoje estouram a moldura e caem em lugares diferentes.
       - Contornos do painel mais finos (bordas de 4 px estao grossas demais).
-      - FALTA: rodada e pedido atual saem do topo e vao para um quadro fixo no canto
+      - Rodada e pedido atual saem do topo e vao para um quadro fixo no canto
         inferior direito, no estilo do log, mas sempre visivel.
-- [~] B5. BUGS do fim de partida:
-      - FALTA: o copo continua na frente do rosto do personagem depois do castigo.
+- [x] B5. BUGS do fim de partida:
+      - [x] O copo continua na frente do rosto do personagem depois do castigo.
       - [x] Os dados de "Ver Dados" continuam na tela depois que o painel some.
-- [ ] B6. IA: nivel de dificuldade sorteado por NPC a cada partida, sempre 5
+- [x] B6. IA: nivel de dificuldade sorteado por NPC a cada partida, sempre 5
       niveis (1 facil a 5 dificil) definidos por multiplicadores de
       agressividade/cautela sobre o perfil. Heroi e Ciborgue precisam blefar
       mais (hoje quase nao blefam). Mostrar o nivel de cada um no log ao
@@ -92,3 +92,22 @@ show de auditorio, em dialogues.json (ui.hora_castigo).
 - [ ] D1. Validacao visual, ajustes finos, apagar este documento e gerar a
       retomada. Depois disso o jogo entra em fase de lancamento (export Web,
       que depende dos templates do Godot instalados na maquina).
+
+---
+
+## Notas do Bloco B (o que foi feito e por que)
+
+- B4 placar: os rotulos LabelInfo e LabelDadosMesa mudaram de casa (o no Topo
+  foi removido), com largura travada em LARGURA_PLACAR - sem isso o texto
+  empurrava o quadro para cima do painel de jogada.
+- B5 copo no rosto: eram duas coisas. O copo do assento do fundo estava em
+  z = -0,42 e, com a camera baixa, projetava em cima do rosto de quem senta la;
+  foi para -0,26. E no fim da partida MesaController.recolher_copos() tira
+  todos, para a comemoracao ficar limpa.
+- B6 dificuldade: NpcAI.nivel (1 a 5, sorteado por NPC em Main._ready) embaralha
+  a PROBABILIDADE que o NPC enxerga (NpcAI._com_erro), em vez de mexer nas
+  regras. Nivel 1 erra ate 0,22 na leitura e decide em cima da conta errada;
+  nivel 5 ve o numero exato. O blefe de atrevimento tambem depende do nivel:
+  quem e fraco blefa no susto, quem e forte blefa com criterio.
+  Heroi (agressividade 0,85 -> 0,95) e Ciborgue (0,3 -> 0,65 e cautela
+  0,9 -> 0,65) passaram a blefar bem mais. O nivel de cada um abre o log.

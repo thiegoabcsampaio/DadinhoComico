@@ -115,6 +115,13 @@ func remover_copo(jogador_id: int) -> void:
 	tween.tween_callback(func() -> void: copo.visible = false)
 
 
+## Fim de partida: tira todos os copos da mesa. Sem isso o copo do vencedor
+## fica entre a câmera e o rosto dele durante a comemoração.
+func recolher_copos() -> void:
+	for copo in _copos.get_children():
+		remover_copo(int(str(copo.name).trim_prefix("Copo")))
+
+
 ## Onde o copo de um jogador está, para efeitos que saem da mesa e vão
 ## para a HUD. Vector3.ZERO quando o copo já saiu de cena.
 func posicao_copo(jogador_id: int) -> Vector3:

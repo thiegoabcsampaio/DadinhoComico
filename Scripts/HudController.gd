@@ -29,6 +29,8 @@ const NARRADOR := -1
 const FOLGA_BALAO := 10.0
 ## Respiro entre uma fala e a seguinte.
 const INTERVALO_FALA := 0.2
+## Largura util do quadro de rodada, no canto inferior direito.
+const LARGURA_PLACAR := 286.0
 
 ## Ver Dados: tempo do voo dos dados entre a mesa e o painel.
 const DURACAO_ZOOM := 0.4
@@ -128,11 +130,58 @@ func _ready() -> void:
 	_label_meus_dados.custom_minimum_size = Vector2(TAMANHO_DADO.x * 3.0 + 20.0, TAMANHO_DADO.y)
 	_label_meus_dados.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_criar_pedido()
+	_criar_placar()
 	_criar_camada_efeitos()
 	_criar_log()
 	_criar_falas()
 	_preparar_game_feel()
 	habilitar_vez(false)
+
+
+## Rodada, pedido atual e dados de cada um saem do topo da tela e vão para
+## um quadro no canto inferior direito, no estilo do log, mas sempre visível:
+## é informação de consulta, não manchete.
+func _criar_placar() -> void:
+	var placar := PanelContainer.new()
+	placar.name = "Placar"
+	placar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var fundo := StyleBoxFlat.new()
+	fundo.bg_color = Color(0.09, 0.07, 0.06, 0.72)
+	fundo.border_color = Color(0.1, 0.1, 0.1, 0.9)
+	fundo.set_border_width_all(2)
+	fundo.set_corner_radius_all(14)
+	fundo.set_content_margin_all(10.0)
+	placar.add_theme_stylebox_override("panel", fundo)
+	add_child(placar)
+	placar.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	placar.offset_left = -(LARGURA_PLACAR + 32.0)
+	placar.offset_top = -136.0
+	placar.offset_right = -12.0
+	placar.offset_bottom = -12.0
+
+	var coluna := VBoxContainer.new()
+	coluna.add_theme_constant_override("separation", 4)
+	coluna.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	placar.add_child(coluna)
+
+	# Os dois rótulos já existem na HUD.tscn: mudam de casa, não de identidade.
+	# A largura fica travada: sem isso o texto empurra o quadro para a esquerda
+	# e ele acaba por cima do painel de jogada.
+	for rotulo in [_label_info, _label_mesa]:
+		rotulo.get_parent().remove_child(rotulo)
+		coluna.add_child(rotulo)
+		rotulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		rotulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		rotulo.custom_minimum_size = Vector2(LARGURA_PLACAR, 0.0)
+		rotulo.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_label_info.add_theme_font_size_override("font_size", 16)
+	_label_info.add_theme_color_override("font_color", Color(1.0, 0.92, 0.7))
+	_label_mesa.add_theme_font_size_override("font_size", 13)
+	_label_mesa.add_theme_color_override("font_color", Color(0.85, 0.83, 0.78))
+
+	var topo := get_node_or_null("Topo")
+	if topo != null:
+		topo.queue_free()
 
 
 ## Logo abaixo de "Sua vez!": o que está na mesa e precisa ser superado.

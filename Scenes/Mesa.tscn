@@ -18,7 +18,7 @@ script = ExtResource("4_controller")
 [node name="Copos" type="Node3D" parent="."]
 
 [node name="Copo0" type="Node3D" parent="Copos"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.755, -0.42)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.755, -0.26)
 
 [node name="Modelo" parent="Copos/Copo0" instance=ExtResource("2_copo")]
 transform = Transform3D(1.4, 0, 0, 0, -1.4, 0, 0, 0, -1.4, 0, 0.168, 0)

@@ -6,6 +6,6 @@
 script = ExtResource("1_perfil")
 nome = "Herói"
 chave_dialogo = "heroi"
-agressividade = 0.85
+agressividade = 0.95
 cautela = 0.2
 frequencia_tells = 0.9

@@ -18,7 +18,15 @@ extends RefCounted
 ## um tell (Etapa 6).
 const P_BLEFE_ARRISCADO := 0.25
 
+## Quantos níveis de dificuldade existem, do mais fácil ao mais difícil.
+const NIVEIS := 5
+## Erro máximo de leitura no nível 1. Cada nível acima corta um quinto dele.
+const ERRO_MAXIMO := 0.22
+
 var perfil: NpcProfile
+## 1 = fácil (erra muito a conta e blefa no susto), 5 = difícil (lê certo).
+## Sorteado por partida em Main, para a mesa não ser sempre igual.
+var nivel := 3
 ## true se a última jogada foi um blefe em aposta de alto risco.
 var blefe_arriscado := false
 ## Números da última decisão, para debug e logs.
@@ -45,9 +53,11 @@ func decidir(jogo: GameManager, jogador_id: int) -> Dictionary:
 	if atual == null:
 		return _abrir(meus, desconhecidos, curinga)
 
-	var p_atual := _prob_aposta(atual.quantidade, atual.face, meus, desconhecidos, curinga)
+	# O nível entra aqui: um NPC fraco enxerga a probabilidade torta e decide
+	# em cima da conta errada. Um NPC forte vê o número real.
+	var p_atual := _com_erro(_prob_aposta(atual.quantidade, atual.face, meus, desconhecidos, curinga))
 	var melhor := _melhor_lance(atual, meus, desconhecidos, curinga)
-	var p_melhor: float = melhor["p"]
+	var p_melhor: float = _com_erro(melhor["p"])
 
 	var limiar_dudo := 0.30 + 0.25 * perfil.cautela
 	var limiar_aposta := 0.35 + 0.25 * perfil.cautela - 0.15 * perfil.agressividade
@@ -73,11 +83,23 @@ func decidir(jogo: GameManager, jogador_id: int) -> Dictionary:
 		return _dudo()
 	var risco_dudo := p_atual
 	var risco_blefe := (1.0 - p_melhor) * (1.0 - 0.4 * perfil.agressividade)
-	if risco_blefe < risco_dudo or _rng.randf() < perfil.agressividade * 0.3:
+	# Blefe de atrevimento: sai mesmo quando a conta não manda, e é o que dá
+	# graça à mesa. Quem é agressivo blefa mais; nível baixo blefa no susto.
+	var atrevimento := perfil.agressividade * (0.55 - 0.05 * nivel)
+	if risco_blefe < risco_dudo or _rng.randf() < atrevimento:
 		ultima_analise["blefe"] = true
 		blefe_arriscado = p_melhor < P_BLEFE_ARRISCADO
 		return _apostar(melhor)
 	return _dudo()
+
+
+## Embaralha a probabilidade conforme o nível: no 5 devolve o valor exato,
+## no 1 pode errar bastante para mais ou para menos.
+func _com_erro(p: float) -> float:
+	if nivel >= NIVEIS:
+		return p
+	var escala := ERRO_MAXIMO * float(NIVEIS - nivel) / float(NIVEIS - 1)
+	return clampf(p + _rng.randfn(0.0, escala), 0.0, 1.0)
 
 
 ## Primeira aposta da rodada: face mais frequente no próprio copo,

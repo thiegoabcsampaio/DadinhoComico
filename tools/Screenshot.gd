@@ -60,7 +60,7 @@ func _ready() -> void:
 			for id in main._controladores:
 				main._falar(id, "reacoes")
 				await get_tree().create_timer(0.05).timeout
-			main.hud.registrar_evento("Face 4 apareceu 3 vezes: aposta VERDADEIRA.")
+			main.hud.registrar_evento("Face 4 apareceu 3 vezes: pedido VERDADEIRO.")
 		"zoom":
 			# Ver Dados pelo caminho real: HUD -> Main -> mesa + zoom na HUD.
 			main.hud._botao_ver_dados.button_pressed = true

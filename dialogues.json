@@ -4,7 +4,8 @@
 		"sua_vez": "Sua vez!",
 		"vez_de": "Vez de %s...",
 		"dudo": "DESCONFIO!",
-		"info_rodada": "Rodada %d  —  Pedido atual: %s",
+		"info_rodada": "Rodada %d
+Pedido: %s",
 		"sem_aposta": "nenhum",
 		"info_aposta": "%s (%s)",
 		"dados_jogador": "%s: %d",
@@ -31,7 +32,8 @@
 		"titulo_log": "Histórico da partida",
 		"ultimo_pedido": "Precisa superar: %s",
 		"pedido_livre": "Mesa livre: peça o que quiser",
-		"titulo_rodada": "Rodada %d"
+		"titulo_rodada": "Rodada %d",
+		"log_nivel": "%s entrou no nível %d de %d"
 	},
 
 	"apresentadora": {
