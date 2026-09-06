@@ -14,11 +14,18 @@ const LARGURA_CAUDA := 10.0
 ## Largura fixa do texto. Sem isto o balão fica do tamanho da frase, chega a
 ## 600 pixels e escorre para fora da tela.
 const LARGURA_TEXTO := 300.0
+## O resultado da rodada é mais estreito, para quebrar em mais linhas e caber
+## dentro do tampo da mesa.
+const LARGURA_NARRADOR := 220.0
 ## Folga mínima entre o balão e a borda da tela.
 const MARGEM_TELA := 10.0
-const COR_FUNDO := Color(1, 1, 1, 1)
-const COR_BORDA := Color(0.1, 0.1, 0.1, 1)
 const ESPESSURA_BORDA := 4.0
+
+## Cores da cauda, que acompanham o painel. Trocadas em [method virar_narrador].
+var cor_fundo := Color(1, 1, 1, 1)
+var cor_borda := Color(0.1, 0.1, 0.1, 1)
+## O balão do narrador é uma legenda, não uma fala: não tem cauda.
+var com_cauda := true
 
 ## Quanto o balão sai do lugar para não cobrir outro balão nem o log. Quem
 ## decide é o HudController, que vê a tela inteira de uma vez; aqui o desvio
@@ -75,8 +82,12 @@ func _reposicionar() -> void:
 		hide()
 		return
 	var tela := _camera.unproject_position(mundo)
-	# A ponta da cauda fica exatamente no ponto projetado.
-	posicao_base = tela - Vector2(size.x * 0.5, size.y + ALTURA_CAUDA)
+	if com_cauda:
+		# A ponta da cauda fica exatamente no ponto projetado.
+		posicao_base = tela - Vector2(size.x * 0.5, size.y + ALTURA_CAUDA)
+	else:
+		# Legenda: fica centrada no ponto, dentro do tampo da mesa.
+		posicao_base = tela - size * 0.5
 	# Balão de quem está na beirada da mesa não pode sair da tela.
 	var limite := get_viewport_rect().size.x - size.x - MARGEM_TELA
 	posicao_base.x = clampf(posicao_base.x, MARGEM_TELA, maxf(MARGEM_TELA, limite))
@@ -88,10 +99,35 @@ func _reposicionar() -> void:
 ## Cauda triangular desenhada abaixo do painel. Quando o balão é empurrado
 ## para cima, a cauda estica para continuar apontando o personagem.
 func _draw() -> void:
+	if not com_cauda:
+		return
 	var base := Vector2(size.x * 0.5, size.y - ESPESSURA_BORDA)
 	var esquerda := base + Vector2(-LARGURA_CAUDA, 0.0)
 	var direita := base + Vector2(LARGURA_CAUDA, 0.0)
 	# A ponta acompanha o personagem mesmo com o balão deslocado.
 	var ponta := Vector2(size.x * 0.5, size.y + ALTURA_CAUDA + ESPESSURA_BORDA) - desvio
-	draw_colored_polygon(PackedVector2Array([esquerda, direita, ponta]), COR_FUNDO)
-	draw_polyline(PackedVector2Array([esquerda, ponta, direita]), COR_BORDA, ESPESSURA_BORDA)
+	draw_colored_polygon(PackedVector2Array([esquerda, direita, ponta]), cor_fundo)
+	draw_polyline(PackedVector2Array([esquerda, ponta, direita]), cor_borda, ESPESSURA_BORDA)
+
+
+## Transforma este balão na legenda do resultado da rodada: verde escuro,
+## texto claro, mais estreito (quebra em mais linhas) e sem cauda, para ficar
+## dentro do tampo da mesa sem se confundir com as falas dos personagens.
+func virar_narrador() -> void:
+	com_cauda = false
+	cor_fundo = Color(0.06, 0.24, 0.15)
+	cor_borda = Color(0.98, 0.86, 0.35)
+	var caixa := StyleBoxFlat.new()
+	caixa.bg_color = cor_fundo
+	caixa.border_color = cor_borda
+	caixa.set_border_width_all(4)
+	caixa.set_corner_radius_all(14)
+	caixa.content_margin_left = 18.0
+	caixa.content_margin_right = 18.0
+	caixa.content_margin_top = 10.0
+	caixa.content_margin_bottom = 10.0
+	add_theme_stylebox_override("panel", caixa)
+	_texto.add_theme_color_override("font_color", Color(1.0, 0.98, 0.9))
+	_texto.custom_minimum_size.x = LARGURA_NARRADOR
+	_texto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	reset_size()

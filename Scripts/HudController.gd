@@ -411,7 +411,9 @@ func configurar(jogo: GameManager, humano: int, camera: Camera3D, ancoras: Dicti
 		# Os balões dos personagens sobem até a cabeça; o do narrador fica
 		# rente ao tampo, no meio da mesa, como legenda da revelação.
 		if id == NARRADOR:
-			balao.deslocamento = Vector3(0.0, 0.12, 0.0)
+			# Logo acima do feltro: a legenda fica deitada dentro da mesa.
+			balao.deslocamento = Vector3(0.0, -0.12, 0.0)
+			balao.virar_narrador()
 		balao.configurar(ancoras[id], camera)
 		_baloes[id] = balao
 
@@ -460,6 +462,11 @@ func mostrar_balao(jogador_id: int, texto: String, duracao: float = DURACAO_BALA
 ## balões um por cima do outro. Aqui o de baixo fica no lugar e os que
 ## encostam nele sobem, na ordem de quem está mais ao fundo da mesa.
 func _process(_delta: float) -> void:
+	# A legenda do resultado ocupa o centro da mesa, onde também fica o texto
+	# de status. Enquanto ela estiver no ar, o status sai da frente.
+	if _baloes.has(NARRADOR):
+		_label_status.visible = not _baloes[NARRADOR].visible
+
 	var visiveis: Array[BalaoDialogo] = []
 	for id in _baloes:
 		var balao: BalaoDialogo = _baloes[id]
@@ -578,7 +585,8 @@ func _ao_declarar_dudo(acusador: int, _acusado: int) -> void:
 ## centro da mesa, para o jogador não precisar olhar para o rodapé.
 func _ao_resolver_dudo(r: BetValidator.ResultadoDudo) -> void:
 	var veredicto := _t("verdadeira") if r.aposta_verdadeira else _t("mentira")
-	_label_status.text = DialogueLoader.get_fmt("ui", "revelacao", [r.aposta.face, r.contagem_real, veredicto, _jogo.nome(r.perdedor)])
+	# O resultado sai no balão do narrador; repetir no rodapé seria eco.
+	_label_status.text = ""
 	mostrar_balao(NARRADOR, DialogueLoader.get_random("narrador", "resultado", {
 		"face": r.aposta.face,
 		"contagem": r.contagem_real,
