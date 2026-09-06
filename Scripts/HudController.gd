@@ -13,20 +13,6 @@ signal dudo_solicitado()
 const CENA_BALAO := preload("res://Scenes/BalaoDialogo.tscn")
 const DURACAO_BALAO := 2.5
 
-# TODO Etapa 4: mover para dialogues.json (categoria "ui").
-const TXT_SUA_VEZ := "Sua vez!"
-const TXT_VEZ_DE := "Vez de %s..."
-const TXT_DUDO := "DUDO!"
-const TXT_INFO := "Rodada %d  —  Aposta atual: %s"
-const TXT_SEM_APOSTA := "nenhuma"
-const TXT_INFO_APOSTA := "%s (%s)"
-const TXT_DADOS_JOGADOR := "%s: %d"
-const TXT_REVELACAO := "Face %d apareceu %d vez(es) — aposta %s. %s perde 1 dado."
-const TXT_VERDADEIRA := "VERDADEIRA"
-const TXT_MENTIRA := "MENTIRA"
-const TXT_ELIMINADO := "%s ficou sem dados! CASTIGO!"
-const TXT_VENCEDOR := "Fim de jogo — %s venceu!"
-
 @onready var _label_info: Label = %LabelInfo
 @onready var _label_mesa: Label = %LabelDadosMesa
 @onready var _label_status: Label = %LabelStatus
@@ -39,6 +25,9 @@ const TXT_VENCEDOR := "Fim de jogo — %s venceu!"
 @onready var _botao_ver_dados: Button = %BotaoVerDados
 @onready var _painel_dados: PanelContainer = %PainelDados
 @onready var _label_meus_dados: Label = %LabelMeusDados
+@onready var _label_titulo_dados: Label = %LabelTituloDados
+@onready var _label_titulo_qtd: Label = %LabelTituloQtd
+@onready var _label_titulo_face: Label = %LabelTituloFace
 @onready var _camada_baloes: Control = %Baloes
 
 var _jogo: GameManager
@@ -51,7 +40,19 @@ var _quantidade := 1
 var _face := DiceSystem.FACE_MIN
 
 
+func _t(chave: String) -> String:
+	return DialogueLoader.get_text("ui", chave)
+
+
 func _ready() -> void:
+	_label_info.text = _t("info_inicial")
+	_label_titulo_dados.text = _t("titulo_seus_dados")
+	_label_titulo_qtd.text = _t("titulo_quantidade")
+	_label_titulo_face.text = _t("titulo_face")
+	_botao_apostar.text = _t("botao_apostar")
+	_botao_dudo.text = _t("botao_dudo")
+	_botao_ver_dados.text = _t("botao_ver_dados")
+
 	_botao_menos.pressed.connect(func() -> void: _definir_quantidade(_quantidade - 1))
 	_botao_mais.pressed.connect(func() -> void: _definir_quantidade(_quantidade + 1))
 	for i in _faces.get_child_count():
@@ -96,11 +97,10 @@ func habilitar_vez(ativa: bool) -> void:
 	_botao_dudo.disabled = not ativa or _jogo == null or _jogo.aposta_atual == null
 
 	if ativa and _jogo != null:
-		# Sugere a menor aposta válida como ponto de partida.
 		var minima := _jogo.validador.aposta_minima_seguinte(_jogo.aposta_atual, _humano)
 		_quantidade = minima.quantidade
 		_face = minima.face
-		_label_status.text = TXT_SUA_VEZ
+		_label_status.text = _t("sua_vez")
 	_atualizar_seletor()
 
 
@@ -137,14 +137,14 @@ func _atualizar_seletor() -> void:
 
 
 func _atualizar_info() -> void:
-	var aposta_txt := TXT_SEM_APOSTA
+	var aposta_txt := _t("sem_aposta")
 	if _jogo.aposta_atual != null:
-		aposta_txt = TXT_INFO_APOSTA % [_jogo.aposta_atual, _jogo.nome(_jogo.aposta_atual.jogador)]
-	_label_info.text = TXT_INFO % [_jogo.numero_rodada, aposta_txt]
+		aposta_txt = DialogueLoader.get_fmt("ui", "info_aposta", [_jogo.aposta_atual, _jogo.nome(_jogo.aposta_atual.jogador)])
+	_label_info.text = DialogueLoader.get_fmt("ui", "info_rodada", [_jogo.numero_rodada, aposta_txt])
 
 	var partes := PackedStringArray()
 	for id in _jogo.turnos.ativos():
-		partes.append(TXT_DADOS_JOGADOR % [_jogo.nome(id), _jogo.dados.quantidade_dados(id)])
+		partes.append(DialogueLoader.get_fmt("ui", "dados_jogador", [_jogo.nome(id), _jogo.dados.quantidade_dados(id)]))
 	_label_mesa.text = "   ·   ".join(partes)
 
 
@@ -162,7 +162,7 @@ func _ao_iniciar_rodada(_numero: int) -> void:
 
 func _ao_mudar_turno(jogador_id: int) -> void:
 	if jogador_id != _humano and not _jogo.jogo_acabou():
-		_label_status.text = TXT_VEZ_DE % _jogo.nome(jogador_id)
+		_label_status.text = DialogueLoader.get_fmt("ui", "vez_de", [_jogo.nome(jogador_id)])
 
 
 func _ao_apostar(aposta: BetValidator.Aposta) -> void:
@@ -171,21 +171,21 @@ func _ao_apostar(aposta: BetValidator.Aposta) -> void:
 
 
 func _ao_declarar_dudo(acusador: int, _acusado: int) -> void:
-	mostrar_balao(acusador, TXT_DUDO)
+	mostrar_balao(acusador, _t("dudo"))
 
 
 func _ao_resolver_dudo(r: BetValidator.ResultadoDudo) -> void:
-	var veredicto := TXT_VERDADEIRA if r.aposta_verdadeira else TXT_MENTIRA
-	_label_status.text = TXT_REVELACAO % [r.aposta.face, r.contagem_real, veredicto, _jogo.nome(r.perdedor)]
+	var veredicto := _t("verdadeira") if r.aposta_verdadeira else _t("mentira")
+	_label_status.text = DialogueLoader.get_fmt("ui", "revelacao", [r.aposta.face, r.contagem_real, veredicto, _jogo.nome(r.perdedor)])
 	_atualizar_info()
 	_atualizar_meus_dados()
 
 
 func _ao_eliminar(jogador_id: int) -> void:
-	_label_status.text = TXT_ELIMINADO % _jogo.nome(jogador_id)
+	_label_status.text = DialogueLoader.get_fmt("ui", "eliminado", [_jogo.nome(jogador_id)])
 	_atualizar_info()
 
 
 func _ao_terminar(vencedor: int) -> void:
-	_label_status.text = TXT_VENCEDOR % _jogo.nome(vencedor)
+	_label_status.text = DialogueLoader.get_fmt("ui", "vencedor", [_jogo.nome(vencedor)])
 	habilitar_vez(false)

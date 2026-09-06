@@ -1,0 +1,23 @@
+{
+	"ui": {
+		"sua_vez": "Sua vez!",
+		"vez_de": "Vez de %s...",
+		"dudo": "DUDO!",
+		"info_rodada": "Rodada %d  —  Aposta atual: %s",
+		"sem_aposta": "nenhuma",
+		"info_aposta": "%s (%s)",
+		"dados_jogador": "%s: %d",
+		"revelacao": "Face %d apareceu %d vez(es) — aposta %s. %s perde 1 dado.",
+		"verdadeira": "VERDADEIRA",
+		"mentira": "MENTIRA",
+		"eliminado": "%s ficou sem dados! CASTIGO!",
+		"vencedor": "Fim de jogo — %s venceu!",
+		"botao_apostar": "Apostar",
+		"botao_dudo": "Dudo!",
+		"botao_ver_dados": "Ver Dados",
+		"titulo_quantidade": "Quantidade",
+		"titulo_face": "Face",
+		"titulo_seus_dados": "Seus dados",
+		"info_inicial": "Rodada -"
+	}
+}
