@@ -28,7 +28,10 @@ DadinhoComico/
 │   │   ├── Bruxa.glb
 │   │   ├── Heroi.glb
 │   │   ├── Ciborgue.glb
-│   │   └── Nave.glb             (nave de papelao com X, castigo da Apresentadora)
+│   │   ├── Nave.glb             (disco voador de papelao, castigo da Apresentadora)
+│   │   ├── Espectador.glb       (plateia: corpo <600 tris, 4 loops, acessorios Acc_*)
+│   │   ├── Arquibancada.glb     (3 degraus, ~4 lugares por degrau)
+│   │   └── Estudio.glb          (chao, parede curva com faixa e luzes, painel do logo)
 │   ├── Source/
 │   │   ├── .gdignore            (Godot nao importa esta pasta)
 │   │   └── Personagens.blend    (fonte dos modelos; regenerado via Blender MCP)
@@ -107,7 +110,7 @@ DadinhoComico/
 - Scripts GDScript: PascalCase (StateManager.gd)
 - Assets 3D: exportar do Blender como .glb (GLTF binary)
 - Texturas: .png para diffuse, normal, roughness
-- Audio: SFX curtos em .wav sintetizados (Assets/Audio/SFX/); musica em .ogg
+- Audio: SFX curtos e musica em .wav sintetizados (SFX/ e Music/); .ogg so se vier de fora
 - Todos os textos em dialogues.json na raiz, nunca hardcoded
 - Perfis de NPC como Resource (.tres) com campos: nome, agressividade, cautela, frequencia_tells- Modelos 3D: materiais so com cor base (sem texturas) enquanto o estilo PS2 nao pedir; o .blend fonte fica em Assets/Source/
 - Personagens olham para +Z no proprio .glb; a rotacao para o centro da mesa fica no assento em Main.tscn
@@ -119,3 +122,6 @@ DadinhoComico/
   foco (escurecer + zoom) durante as falas
 - Scripts/LogHistorico.gd: painel do historico da partida, aberto pelo icone no canto
   superior esquerdo; vive so durante a partida
+- Espectador.glb: materiais Esp_Pele/Esp_Roupa/Esp_Cabelo para recolorir por instancia;
+  acessorios como malhas separadas (Acc_Plaquinha, Acc_Frufru, Acc_Oculos, Acc_Bone) para
+  ligar/desligar por espectador; animacoes em loop Idle, Aplaudir, LevantarPlaquinha, AgitarFrufru

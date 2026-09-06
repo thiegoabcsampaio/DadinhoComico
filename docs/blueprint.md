@@ -150,6 +150,10 @@ Agentes: [F] [B] para assets, [O] para integracao Godot
 
 Pre-requisito: Bloco B de docs/blueprint_melhorias.md concluido.
 
+Progresso: assets do Fable prontos (Espectador.glb com 4 loops e 4 acessorios
+desligaveis, Arquibancada.glb, Estudio.glb ja integrado na Main, Tema_Menu.wav).
+Falta o lado Godot: PlateiaController, Plateia.tscn, musica no Menu e reacoes.
+
 Acoes:
 - Gerar via Blender MCP duas arquibancadas de estudio (esquerda e direita da
   camera, fora da mesa) em .glb, low-poly
