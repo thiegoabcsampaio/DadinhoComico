@@ -12,7 +12,7 @@ codigo). Ao trocar de modelo, colar o PONTO DE RETOMADA da sessao anterior.
 
 ## Bloco A — Fable (fazer primeiro, exige Blender conectado)
 
-- [x] A1. Redesign do Ciborgue. O modelo atual parecia um pinguim (torso
+- [x] A1. Redesign do Ciborgue (REVERTIDO a pedido: o modelo original da Etapa 6 voltou; ver commit). O modelo atual parecia um pinguim (torso
       esferico, braços curtos, roupa preta). Refazer como humanoide
       cibernetico estilo Exterminador: ombros largos, torso reto, jaqueta,
       calça jeans, braço direito de endoesqueleto, metade do rosto metalica
