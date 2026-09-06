@@ -63,10 +63,12 @@ Ciborgue (parodia Exterminador):
   - Se a aposta era verdadeira: acusador perde 1 dado
   - Se a aposta era falsa: apostador perde 1 dado
 - Modos de jogo, escolhidos no menu:
-  - Dadinho: cada dado vale so a propria face (padrao)
-  - Dados mentirosos: o as (face 1) e curinga e conta para qualquer face pedida.
-    Quase dobra a chance de cada pedido ser verdadeiro, entao os pedidos sobem
-    mais rapido e o Desconfio fica mais arriscado
+  - Dadinho (padrao): o as (face 1) e curinga e conta para qualquer face pedida.
+    Trocar de uma face comum para ases custa METADE da quantidade, arredondada
+    para cima (3 x face 6 -> 2 ases; 10 x face 6 -> 5 ases). Sair dos ases para
+    uma face comum custa o DOBRO mais um (2 ases -> 5 de qualquer face). De ases
+    para ases, sobe a quantidade normalmente
+  - Dados mentirosos: sem curinga, cada dado vale so a propria face
 - Jogador sem dados e eliminado (recebe castigo comico)
 - Ultimo jogador vence
 

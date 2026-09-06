@@ -56,7 +56,7 @@ func decidir(jogo: GameManager, jogador_id: int) -> Dictionary:
 	# O nível entra aqui: um NPC fraco enxerga a probabilidade torta e decide
 	# em cima da conta errada. Um NPC forte vê o número real.
 	var p_atual := _com_erro(_prob_aposta(atual.quantidade, atual.face, meus, desconhecidos, curinga))
-	var melhor := _melhor_lance(atual, meus, desconhecidos, curinga)
+	var melhor := _melhor_lance(jogo.validador, atual, meus, desconhecidos, curinga)
 	var p_melhor: float = _com_erro(melhor["p"])
 
 	var limiar_dudo := 0.30 + 0.25 * perfil.cautela
@@ -119,15 +119,16 @@ func _abrir(meus: Array[int], desconhecidos: int, curinga: bool) -> Dictionary:
 	return { "acao": GameManager.ACAO_APOSTAR, "quantidade": quantidade, "face": melhor_face }
 
 
-## Entre todos os lances válidos de subida mínima (mesma quantidade com
-## face maior, ou quantidade + 1 com qualquer face), o de maior chance.
-func _melhor_lance(atual: BetValidator.Aposta, meus: Array[int], desconhecidos: int, curinga: bool) -> Dictionary:
+## Entre os lances válidos mais baratos de cada face, o de maior chance.
+## Quem decide o que é válido é o BetValidator, então a regra do ás curinga
+## (metade para entrar, dobro mais um para sair) entra aqui de graça: o NPC
+## enxerga que trocar para ases sai barato e usa isso.
+func _melhor_lance(validador: BetValidator, atual: BetValidator.Aposta, meus: Array[int], desconhecidos: int, curinga: bool) -> Dictionary:
 	var melhor := { "quantidade": atual.quantidade + 1, "face": DiceSystem.FACE_MIN, "p": -1.0 }
 	for face in range(DiceSystem.FACE_MIN, DiceSystem.FACE_MAX + 1):
-		var candidatos: Array[int] = [atual.quantidade + 1]
-		if face > atual.face:
-			candidatos.append(atual.quantidade)
-		for quantidade in candidatos:
+		var minima := validador.quantidade_minima(face, atual)
+		for extra in 2:
+			var quantidade := minima + extra
 			var p := _prob_aposta(quantidade, face, meus, desconhecidos, curinga)
 			# Empate: prefere a menor quantidade (mais fácil de sustentar).
 			if p > melhor["p"] or (is_equal_approx(p, melhor["p"]) and quantidade < melhor["quantidade"]):

@@ -12,8 +12,14 @@ func _ready() -> void:
 	var modo: String = args[1] if args.size() > 1 else "jogo"
 	var frames: int = int(args[2]) if args.size() > 2 else 30
 
-	if modo == "menu":
-		add_child(load("res://Scenes/Menu.tscn").instantiate())
+	if modo == "menu" or modo == "menu_hover":
+		var tela: Control = load("res://Scenes/Menu.tscn").instantiate()
+		add_child(tela)
+		await get_tree().process_frame
+		if modo == "menu_hover":
+			var cartao: Button = tela._lista.get_child(1)
+			cartao.mouse_entered.emit()
+			cartao.grab_focus()
 		for i in frames:
 			await get_tree().process_frame
 		get_viewport().get_texture().get_image().save_png(destino)

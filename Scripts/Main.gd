@@ -7,21 +7,6 @@ extends Node3D
 ## manda para os balões. Entre rodadas dá tempo para ler a revelação.
 
 const JOGADOR_HUMANO := 0
-## Perfil por personagem, achado pelo nome do nó em Scenes/NPCs/.
-## O assento de cada um é sorteado a cada partida (ver [method _sortear_assentos]).
-const PERFIS := {
-	"Apresentadora": preload("res://Resources/NPCProfiles/Apresentadora.tres"),
-	"Bruxa": preload("res://Resources/NPCProfiles/Bruxa.tres"),
-	"Heroi": preload("res://Resources/NPCProfiles/Heroi.tres"),
-	"Ciborgue": preload("res://Resources/NPCProfiles/Ciborgue.tres"),
-}
-## Cor de cada personagem no log de histórico.
-const CORES := {
-	"Apresentadora": Color(1.0, 0.45, 0.72),
-	"Bruxa": Color(0.55, 0.85, 0.35),
-	"Heroi": Color(1.0, 0.42, 0.35),
-	"Ciborgue": Color(0.62, 0.78, 1.0),
-}
 
 ## Pausa antes de cada jogada de NPC, para o jogador acompanhar.
 @export var atraso_npc: float = 1.2
@@ -50,6 +35,8 @@ const CORES := {
 var _ias := {}
 ## jogador_id -> NpcController (modelo animado no assento)
 var _controladores := {}
+## jogador_id -> NpcProfile do personagem que ocupa o assento
+var _perfis := {}
 ## Dados de todos no momento do Dudo (DiceSystem remove um dado antes de
 ## emitir dudo_resolvido, então a foto é tirada em dudo_declarado).
 var _revelacao := {}
@@ -66,7 +53,7 @@ func _ready() -> void:
 	var ids: Array[int] = []
 	var nomes := {}
 	for assento in _controladores:
-		var perfil: NpcProfile = PERFIS[_controladores[assento].name]
+		var perfil: NpcProfile = _perfis[assento]
 		ids.append(assento)
 		nomes[assento] = perfil.nome
 		# O jogador controla o próprio personagem: sem IA para ele.
@@ -75,7 +62,7 @@ func _ready() -> void:
 			# Cada NPC entra com um nível sorteado: a mesa nunca é a mesma.
 			ia.nivel = _rng.randi_range(1, NpcAI.NIVEIS)
 			_ias[assento] = ia
-	ids.sort()
+	ids = _ordem_da_mesa(ids)
 
 	# Modo escolhido no menu: no "Dados mentirosos" o ás vale por qualquer face.
 	jogo.validador.ases_curinga = Partida.ases_curinga
@@ -89,7 +76,7 @@ func _ready() -> void:
 		ancoras[id] = assentos.get_node("Assento%d" % id)
 	ancoras[HudController.NARRADOR] = marcador_narrador
 	for id in ids:
-		hud.cores_jogadores[id] = CORES.get(_controladores[id].name, Color.WHITE)
+		hud.cores_jogadores[id] = _perfis[id].cor
 	hud.configurar(jogo, JOGADOR_HUMANO, camera, ancoras)
 	hud.registrar_evento(DialogueLoader.get_fmt("ui", "log_modo",
 		[DialogueLoader.get_text("ui", "modo_mentirosos" if Partida.ases_curinga else "modo_dadinho")]))
@@ -117,56 +104,69 @@ func _exit_tree() -> void:
 	Engine.time_scale = 1.0
 
 
-## Distribui os 4 personagens pelos assentos no início da partida. O
-## personagem escolhido no menu (Partida.personagem) senta sempre no
-## assento 0, o do fundo, de frente para a câmera; os outros três são
-## embaralhados entre os assentos 1..3. A rotação que vira o personagem
-## para o centro está no nó do personagem, então ela pertence ao assento:
-## o transform de cada assento é guardado antes e reaplicado ao novo dono.
-## Preenche [_controladores] (0 = modelo do jogador, sem NpcAI).
+## Monta a mesa com o elenco encontrado em Resources/NPCProfiles.
+##
+## O personagem escolhido no menu senta sempre no assento 0, o do fundo, de
+## frente para a câmera; os demais são sorteados entre os outros assentos.
+## Se houver mais personagens que assentos, os que sobram ficam de fora
+## nesta partida, então acrescentar personagens novos não quebra a mesa.
+## A rotação que vira cada um para o centro está no próprio assento.
+## Preenche [_controladores] e [_perfis] (0 = o jogador, sem NpcAI).
 func _sortear_assentos() -> void:
-	var npcs: Array[NpcController] = []
-	var jogador: NpcController = null
-	## nome do assento -> transform do personagem que estava nele
-	var poses := {}
-	for assento in assentos.get_children():
-		for filho in assento.get_children():
-			if filho is NpcController:
-				poses[assento.name] = filho.transform
-				if filho.name == Partida.personagem:
-					jogador = filho
-				else:
-					npcs.append(filho)
-	if jogador == null:
-		push_warning("Main: personagem '%s' não está na mesa; usando o primeiro" % Partida.personagem)
-		jogador = npcs.pop_front()
+	var elenco := Elenco.nomes()
+	if elenco.is_empty():
+		push_error("Main: nenhum personagem em %s" % Elenco.PASTA_PERFIS)
+		return
+	var escolhido := Partida.personagem if elenco.has(Partida.personagem) else elenco[0]
+	var outros := elenco.duplicate()
+	outros.erase(escolhido)
 
 	# Fisher-Yates com o RNG local, para a semente continuar reproduzindo
 	# a mesma partida (dados, decisões e também os lugares).
-	for i in range(npcs.size() - 1, 0, -1):
+	for i in range(outros.size() - 1, 0, -1):
 		var j := _rng.randi_range(0, i)
-		var troca := npcs[i]
-		npcs[i] = npcs[j]
-		npcs[j] = troca
+		var troca: String = outros[i]
+		outros[i] = outros[j]
+		outros[j] = troca
 
-	var ordem: Array[NpcController] = [jogador]
-	ordem.append_array(npcs)
-	for i in ordem.size():
-		var personagem := ordem[i]
+	var lugares := assentos.get_child_count()
+	var escalados: Array[String] = [escolhido]
+	escalados.append_array(outros.slice(0, maxi(0, lugares - 1)))
+	for i in escalados.size():
+		var nome := escalados[i]
 		var assento: Node3D = assentos.get_node("Assento%d" % i)
-		if personagem.get_parent() != assento:
-			personagem.get_parent().remove_child(personagem)
-			assento.add_child(personagem)
-		personagem.transform = poses[assento.name]
+		var personagem: NpcController = Elenco.cena(nome).instantiate()
+		personagem.name = nome
+		assento.add_child(personagem)
 		_controladores[i] = personagem
+		_perfis[i] = Elenco.perfil(nome)
+
+
+## Ordena os jogadores como eles estão sentados, seguindo para a esquerda
+## de quem joga. Sem isto a vez seguia a numeração dos assentos, que não é a
+## volta da mesa: o assento 1 é a esquerda e o 3 é a frente.
+##
+## Cada jogador olha para o centro, então a esquerda dele é o sentido
+## anti-horário visto de cima, ou seja, o ângulo do assento crescendo.
+func _ordem_da_mesa(ids: Array[int]) -> Array[int]:
+	var ordenados := ids.duplicate()
+	ordenados.sort_custom(func(a: int, b: int) -> bool:
+		return _angulo_do_assento(a) < _angulo_do_assento(b))
+	return ordenados
+
+
+func _angulo_do_assento(jogador_id: int) -> float:
+	var assento := assentos.get_node_or_null("Assento%d" % jogador_id) as Node3D
+	if assento == null:
+		return 0.0
+	return fposmod(atan2(assento.position.z, assento.position.x), TAU)
 
 
 ## Seção do personagem em dialogues.json, pelo modelo sentado no assento.
 func _chave(jogador_id: int) -> String:
-	if not _controladores.has(jogador_id):
+	if not _perfis.has(jogador_id):
 		return ""
-	var perfil: NpcProfile = PERFIS[_controladores[jogador_id].name]
-	return perfil.chave_dialogo
+	return _perfis[jogador_id].chave_dialogo
 
 
 ## Modo espectador: os timers de jogada/rodada respeitam Engine.time_scale,

@@ -48,21 +48,55 @@ func motivo_invalida(nova: Aposta, anterior: Aposta) -> String:
 		return "quantidade precisa ser pelo menos 1"
 	if anterior == null:
 		return ""
-	if nova.quantidade > anterior.quantidade:
+	var minima := quantidade_minima(nova.face, anterior)
+	if nova.quantidade >= minima:
 		return ""
-	if nova.quantidade == anterior.quantidade and nova.face > anterior.face:
-		return ""
-	return "aposta precisa subir a quantidade ou, com a mesma quantidade, subir a face"
+	return "com a face %d o pedido começa em %d" % [nova.face, minima]
+
+
+## Menor quantidade que ainda supera [anterior] para uma dada [face].
+##
+## Sem curinga, a regra é a de sempre: subir a quantidade ou, mantendo a
+## quantidade, subir a face.
+##
+## Com o ás curinga valem as três regras do Perudo, porque um ás vale por
+## qualquer face e portanto é bem mais forte:
+## - trocar de uma face comum para ases custa METADE da quantidade,
+##   arredondada para cima (3 x face 6 -> 2 ases; 10 x face 6 -> 5 ases);
+## - sair dos ases para uma face comum custa o DOBRO mais um
+##   (2 ases -> 5 de qualquer face);
+## - de ases para ases, sobe a quantidade como de costume.
+func quantidade_minima(face: int, anterior: Aposta) -> int:
+	if anterior == null:
+		return 1
+	var subida := anterior.quantidade if face > anterior.face else anterior.quantidade + 1
+	if not ases_curinga:
+		return subida
+	var nova_as := face == DiceSystem.FACE_MIN
+	var antes_as := anterior.face == DiceSystem.FACE_MIN
+	if nova_as and not antes_as:
+		return int(ceil(anterior.quantidade / 2.0))
+	if not nova_as and antes_as:
+		return anterior.quantidade * 2 + 1
+	if nova_as and antes_as:
+		return anterior.quantidade + 1
+	return subida
 
 
 ## A menor aposta que ainda é válida depois de [anterior].
 ## Base para NPCs burros (Etapa 3) e ponto de partida para a IA (Etapa 4).
 func aposta_minima_seguinte(anterior: Aposta, jogador: int) -> Aposta:
 	if anterior == null:
-		return Aposta.new(jogador, 1, DiceSystem.FACE_MIN)
-	if anterior.face < DiceSystem.FACE_MAX:
-		return Aposta.new(jogador, anterior.quantidade, anterior.face + 1)
-	return Aposta.new(jogador, anterior.quantidade + 1, DiceSystem.FACE_MIN)
+		return Aposta.new(jogador, 1, DiceSystem.FACE_MIN + 1 if ases_curinga else DiceSystem.FACE_MIN)
+	# Procura a menor subida entre todas as faces, contando a regra do ás.
+	var melhor: Aposta = null
+	for face in range(DiceSystem.FACE_MIN, DiceSystem.FACE_MAX + 1):
+		var candidata := Aposta.new(jogador, quantidade_minima(face, anterior), face)
+		if melhor == null \
+				or candidata.quantidade < melhor.quantidade \
+				or (candidata.quantidade == melhor.quantidade and candidata.face < melhor.face):
+			melhor = candidata
+	return melhor
 
 
 ## Decide quem perde o dado. [contagem_real] deve vir de

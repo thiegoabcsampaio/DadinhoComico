@@ -187,3 +187,78 @@ reage a aposta (murmurio), Desconfio (silencio), revelacao (aplausos) e
 castigo/fim de jogo (plaquinhas e frufrus). Estudio no lugar do ceu e
 trilha no menu. Medido em 111 FPS a 1600x900 (Intel UHD, GL Compatibility),
 sem custo perceptivel da plateia; o teste no navegador fica para o deploy.
+
+---
+
+## Como acrescentar um personagem
+
+O elenco NAO esta escrito no codigo: Scripts/Elenco.gd le a pasta de perfis e o
+menu e a mesa se montam sozinhos. Para entrar um personagem novo, use o mesmo
+nome (sem espacos nem acentos, ex.: "Palhaco") nos cinco lugares abaixo.
+
+### 1. Modelo e animacoes (Blender)
+
+- Modele no Assets/Source/Personagens.blend, sentado, na mesma escala dos
+  outros: cabeca a ~1,15 m, maos sobre a borda da mesa, rosto para -Y no
+  Blender (vira +Z no Godot).
+- Use o mesmo esqueleto de 15 ossos: root, hips, spine, neck, head,
+  upper_arm/forearm/hand L e R, thigh/shin L e R. Ossos extras (cauda, por
+  exemplo) podem ser acrescentados sem quebrar nada.
+- Roupas sao PECAS proprias, com espessura, nao o corpo pintado: use as
+  funcoes dc.casca(), dc.manga() e dc.vestir() (ver project_structure.md).
+  Materiais por tecido: e a rugosidade que separa couro de jeans e de cetim.
+  Cuidado com metalico alto: no renderizador Compatibility, sem reflexao,
+  metal acima de ~0,4 renderiza quase preto.
+- Grave as 8 animacoes obrigatorias, com o primeiro e o ultimo quadro iguais
+  nas de loop: Idle (loop), Tell_Olhar, Tell_Cocar, Tell_Bater, Apostar,
+  Dudo, Comemorar, Castigo.
+- Exporte para Assets/Models/<Nome>.glb com export_animation_mode='NLA_TRACKS'
+  (o modo ACTIONS vaza acoes de outros personagens para dentro do arquivo).
+- Renderize o retrato 256x256 com fundo transparente em
+  Assets/UI/Retratos/<Nome>.png. Antes de renderizar no Workbench, sincronize
+  material.diffuse_color com o Principled BSDF, senao sai tudo cinza.
+
+### 2. Cena (Godot)
+
+- Scenes/NPCs/<Nome>.tscn: um Node3D com Scripts/NpcController.gd, contendo o
+  .glb instanciado como filho "Modelo". Copie de outro personagem.
+- Nao coloque o personagem em Main.tscn: quem senta na mesa e sorteado.
+
+### 3. Perfil
+
+- Resources/NPCProfiles/<Nome>.tres com script NpcProfile:
+  - nome: como aparece na tela
+  - chave_dialogo: a secao dele em dialogues.json
+  - agressividade e cautela (0 a 1): agressivo blefa e sobe o pedido; cauteloso
+    desconfia mais cedo
+  - frequencia_tells: chance de entregar o blefe num tique nervoso
+  - cor: cor dele no log e no cartao do menu
+  - adereco_torcida: o no Acc_* do Espectador.glb que a plateia levanta por
+    ele (ver item 5)
+
+### 4. Falas (dialogues.json)
+
+Uma secao com a chave_dialogo, contendo:
+nome, apresentacao, apostas, insultos, defesas, reacoes, castigos,
+provocacoes (3, com {nome} do alvo), reacoes_provocacao, vitoria, derrota.
+Use {aposta} onde entra o pedido e {nome} onde entra o outro jogador.
+Nada de texto no codigo: tudo aqui.
+
+### 5. Castigo, efeito de tela e torcida
+
+- PunishmentSystem.castigar(): um caso novo com o castigo comico dele no modelo
+  3D (sem violencia; o tom e de TV dos anos 90).
+- EfeitoTela.castigo(): o efeito de tela correspondente, que o jogador sente
+  quando o personagem dele e castigado. Regra do projeto: todo personagem
+  nasce com os dois.
+- Um adereco de torcida no Espectador.glb (malha separada Acc_<Algo>, presa a
+  um osso pela funcao acessorio()), registrado em PlateiaController:
+  ADERECOS_MAO se for de segurar, ADERECOS_CABECA se for de vestir.
+
+### 6. Assentos
+
+A mesa tem 4 lugares (Assentos/Assento0..3 em Main.tscn). Com mais de 4
+personagens no elenco, o escolhido senta no fundo e os outros lugares sao
+sorteados entre os demais: ninguem quebra, so nao joga naquela partida.
+Para uma mesa maior, acrescente marcadores Assento4, Assento5... girados para
+o centro, e reposicione os copos em Mesa.tscn (Copos/Copo4...).

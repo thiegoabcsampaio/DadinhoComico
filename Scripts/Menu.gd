@@ -13,17 +13,7 @@ const TEMA := preload("res://Assets/Audio/Music/Tema_Menu.wav")
 const VOLUME_TEMA := -12.0
 ## Tempo para a música sumir ao entrar na partida.
 const FADE := 0.5
-## Ordem de exibição; as chaves são nós em Scenes/NPCs/ e Main.PERFIS.
-const PERSONAGENS := ["Apresentadora", "Bruxa", "Heroi", "Ciborgue"]
-## Retrato de cada personagem, renderizado no Blender.
-const RETRATOS := "res://Assets/UI/Retratos/%s.png"
-## Cor do cartão de cada personagem (as mesmas do log em Main.CORES).
-const COR_CARTAO := {
-	"Apresentadora": Color(1.0, 0.55, 0.75),
-	"Bruxa": Color(0.62, 0.85, 0.45),
-	"Heroi": Color(1.0, 0.52, 0.45),
-	"Ciborgue": Color(0.66, 0.8, 1.0),
-}
+
 
 var _escolhido := ""
 var _musica: AudioStreamPlayer
@@ -44,20 +34,22 @@ func _ready() -> void:
 	_botao_jogar.text = DialogueLoader.get_text("ui", "botao_jogar")
 	_botao_jogar.disabled = true
 	_apresentacao.text = ""
-	for nome in PERSONAGENS:
+	# O elenco vem da pasta de perfis: personagem novo aparece aqui sozinho.
+	for nome in Elenco.nomes():
+		var perfil := Elenco.perfil(nome)
 		var botao := Button.new()
-		botao.text = DialogueLoader.get_text(nome.to_lower(), "nome")
+		botao.text = perfil.nome
 		botao.toggle_mode = true
 		botao.custom_minimum_size = Vector2(160.0, 190.0)
 		# Retrato renderizado no Blender (Assets/UI/Retratos), acima do nome.
-		var retrato := RETRATOS % nome
-		if ResourceLoader.exists(retrato):
-			botao.icon = load(retrato)
+		var retrato := Elenco.retrato(nome)
+		if retrato != null:
+			botao.icon = retrato
 			botao.expand_icon = true
 			botao.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 			botao.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			botao.add_theme_constant_override("h_separation", 0)
-		_estilizar(botao, COR_CARTAO.get(nome, Color(1.0, 0.84, 0.2)))
+		_estilizar(botao, perfil.cor.lightened(0.1))
 		botao.pressed.connect(_escolher.bind(nome, botao))
 		_lista.add_child(botao)
 	_criar_modos()
@@ -74,10 +66,15 @@ func _ready() -> void:
 ## Mesmo estilo HQ da HUD: fundo saturado, borda grossa, cantos redondos.
 ## O estado pressionado fica mais claro, para a escolha atual saltar.
 func _estilizar(botao: Button, cor: Color) -> void:
-	botao.add_theme_color_override("font_color", Color(0.12, 0.1, 0.08))
-	botao.add_theme_color_override("font_hover_color", Color(0.12, 0.1, 0.08))
-	botao.add_theme_color_override("font_pressed_color", Color(0.12, 0.1, 0.08))
+	# Todas as variantes, não só normal e hover: sem font_focus_color o nome
+	# do cartão em foco saía branco e sumia no fundo claro.
+	var escuro := Color(0.12, 0.1, 0.08)
+	for estado in ["font_color", "font_hover_color", "font_pressed_color",
+			"font_hover_pressed_color", "font_focus_color"]:
+		botao.add_theme_color_override(estado, escuro)
 	botao.add_theme_color_override("font_disabled_color", Color(0.45, 0.42, 0.38))
+	botao.add_theme_color_override("font_outline_color", Color(1.0, 0.98, 0.92))
+	botao.add_theme_constant_override("outline_size", 5)
 	botao.add_theme_font_size_override("font_size", 20)
 	for estado in ["normal", "hover", "pressed", "disabled"]:
 		var caixa := StyleBoxFlat.new()
@@ -116,9 +113,10 @@ func _criar_modos() -> void:
 	linha.add_child(rotulo)
 
 	var grupo := ButtonGroup.new()
-	for curinga in [false, true]:
+	# Dadinho é o modo com o ás curinga; Dados mentirosos joga sem ele.
+	for curinga in [true, false]:
 		var opcao := CheckBox.new()
-		opcao.text = DialogueLoader.get_text("ui", "modo_mentirosos" if curinga else "modo_dadinho")
+		opcao.text = DialogueLoader.get_text("ui", "modo_dadinho" if curinga else "modo_mentirosos")
 		opcao.button_group = grupo
 		opcao.button_pressed = curinga == Partida.ases_curinga
 		opcao.add_theme_font_size_override("font_size", 20)
@@ -141,14 +139,14 @@ func _definir_modo(curinga: bool) -> void:
 	Partida.ases_curinga = curinga
 	if _dica_modo != null:
 		_dica_modo.text = DialogueLoader.get_text("ui",
-			"modo_mentirosos_dica" if curinga else "modo_dadinho_dica")
+			"modo_dadinho_dica" if curinga else "modo_mentirosos_dica")
 
 
 func _escolher(nome: String, botao: Button) -> void:
 	_escolhido = nome
 	for outro in _lista.get_children():
 		(outro as Button).set_pressed_no_signal(outro == botao)
-	_apresentacao.text = DialogueLoader.get_random(nome.to_lower(), "apresentacao")
+	_apresentacao.text = DialogueLoader.get_random(Elenco.perfil(nome).chave_dialogo, "apresentacao")
 	_botao_jogar.disabled = false
 
 

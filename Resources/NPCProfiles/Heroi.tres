@@ -9,3 +9,5 @@ chave_dialogo = "heroi"
 agressividade = 0.95
 cautela = 0.2
 frequencia_tells = 0.9
+cor = Color(1, 0.42, 0.35, 1)
+adereco_torcida = "Acc_Martelo"

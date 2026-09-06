@@ -77,6 +77,8 @@ var _camada_efeitos: Control
 var _log: LogHistorico
 ## Destaque do pedido a superar, logo abaixo de "Sua vez!".
 var _label_pedido: Label
+## Quadro de rodada no canto inferior direito.
+var _placar: PanelContainer
 ## Ícone que abre e fecha o log.
 var _botao_log: Button
 ## Botão Falar e o painel de provocações (falas dinâmicas).
@@ -153,11 +155,13 @@ func _criar_placar() -> void:
 	fundo.set_content_margin_all(10.0)
 	placar.add_theme_stylebox_override("panel", fundo)
 	add_child(placar)
+	_placar = placar
 	placar.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	placar.offset_left = -(LARGURA_PLACAR + 32.0)
-	placar.offset_top = -136.0
 	placar.offset_right = -12.0
-	placar.offset_bottom = -12.0
+	# Fica exatamente na altura do painel de jogada, sem invadi-lo.
+	_painel_acoes.resized.connect(_alinhar_placar)
+	_alinhar_placar.call_deferred()
 
 	var coluna := VBoxContainer.new()
 	coluna.add_theme_constant_override("separation", 4)
@@ -182,6 +186,17 @@ func _criar_placar() -> void:
 	var topo := get_node_or_null("Topo")
 	if topo != null:
 		topo.queue_free()
+
+
+## Topo e base do quadro acompanham o painel de jogada, que muda de altura
+## conforme o conteúdo. Os offsets são medidos a partir da borda de baixo.
+func _alinhar_placar() -> void:
+	if _placar == null or _painel_acoes == null:
+		return
+	var painel := _painel_acoes.get_global_rect()
+	var altura_tela := get_viewport().get_visible_rect().size.y
+	_placar.offset_top = painel.position.y - altura_tela
+	_placar.offset_bottom = painel.end.y - altura_tela
 
 
 ## Logo abaixo de "Sua vez!": o que está na mesa e precisa ser superado.
@@ -547,8 +562,6 @@ func configurar(jogo: GameManager, humano: int, camera: Camera3D, ancoras: Dicti
 			balao.deslocamento = Vector3(0.0, -0.12, 0.0)
 			balao.virar_narrador()
 		balao.configurar(ancoras[id], camera)
-		if id == humano:
-			balao.ancorar_na_hud(_painel_acoes)
 		_baloes[id] = balao
 
 	jogo.rodada_iniciada.connect(_ao_iniciar_rodada)
@@ -654,13 +667,23 @@ func mostrar_status(texto: String) -> void:
 
 func _definir_quantidade(valor: int) -> void:
 	var maximo := maxi(1, _jogo.dados.total_dados()) if _jogo != null else 1
-	_quantidade = clampi(valor, 1, maximo)
+	_quantidade = clampi(valor, _minimo_para_face(_face), maximo)
 	_atualizar_seletor()
 
 
+## Trocar de face troca o piso do pedido: com o ás curinga, pedir ases custa
+## metade, e voltar dos ases custa o dobro mais um. O seletor pula direto
+## para o pedido mais barato daquela face.
 func _definir_face(face: int) -> void:
 	_face = face
+	_quantidade = _minimo_para_face(face)
 	_atualizar_seletor()
+
+
+func _minimo_para_face(face: int) -> int:
+	if _jogo == null:
+		return 1
+	return _jogo.validador.quantidade_minima(face, _jogo.aposta_atual)
 
 
 func _atualizar_seletor() -> void:

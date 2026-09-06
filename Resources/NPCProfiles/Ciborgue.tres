@@ -9,3 +9,5 @@ chave_dialogo = "ciborgue"
 agressividade = 0.65
 cautela = 0.65
 frequencia_tells = 0.1
+cor = Color(0.62, 0.78, 1, 1)
+adereco_torcida = "Acc_RoboHaste"

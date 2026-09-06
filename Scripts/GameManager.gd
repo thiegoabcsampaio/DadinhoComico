@@ -68,6 +68,10 @@ func iniciar_rodada() -> bool:
 	numero_rodada += 1
 	aposta_atual = null
 	dados.agitar_todos()
+	# Regra da casa: a primeira rodada é aberta por quem tirou o maior dado.
+	# Das seguintes em diante, abre quem perdeu o dado na rodada anterior.
+	if numero_rodada == 1:
+		_proximo_iniciante = _maior_dado()
 	turnos.definir_atual(_proximo_iniciante)
 	estado.mudar_para(StateManager.Estado.APOSTANDO)
 	rodada_iniciada.emit(numero_rodada)
@@ -139,6 +143,19 @@ func _pode_jogar(jogador_id: int) -> bool:
 		push_warning("GameManager: não é a vez do jogador %d (vez de %d)" % [jogador_id, turnos.jogador_atual()])
 		return false
 	return true
+
+
+## Quem tirou o dado mais alto. Empate fica com quem vem antes na ordem da
+## mesa, que já é a ordem de quem joga depois de quem.
+func _maior_dado() -> int:
+	var escolhido := turnos.jogador_atual()
+	var maior := -1
+	for id in turnos.ativos():
+		for dado in dados.revelar(id):
+			if dado > maior:
+				maior = dado
+				escolhido = id
+	return escolhido
 
 
 ## ACUSANDO -> REVELANDO -> (CASTIGO ->) AGUARDANDO | FIM_DE_JOGO

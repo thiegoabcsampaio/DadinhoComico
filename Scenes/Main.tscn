@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=13 format=3]
 
 ; Cena principal.
 ; - Main.gd: fluxo da partida (humano x 4 NPCs random)
@@ -13,10 +13,6 @@
 [ext_resource type="Script" path="res://Scripts/CameraSetup.gd" id="3_camera"]
 [ext_resource type="PackedScene" path="res://Scenes/Mesa.tscn" id="4_mesa"]
 [ext_resource type="PackedScene" path="res://Scenes/HUD.tscn" id="5_hud"]
-[ext_resource type="PackedScene" path="res://Scenes/NPCs/Apresentadora.tscn" id="6_apresentadora"]
-[ext_resource type="PackedScene" path="res://Scenes/NPCs/Bruxa.tscn" id="7_bruxa"]
-[ext_resource type="PackedScene" path="res://Scenes/NPCs/Heroi.tscn" id="8_heroi"]
-[ext_resource type="PackedScene" path="res://Scenes/NPCs/Ciborgue.tscn" id="9_ciborgue"]
 [ext_resource type="Script" path="res://Scripts/PunishmentSystem.gd" id="10_castigos"]
 [ext_resource type="Script" path="res://Scripts/EfeitoTela.gd" id="11_efeitos"]
 [ext_resource type="PackedScene" path="res://Assets/Models/Estudio.glb" id="12_estudio"]
@@ -72,27 +68,20 @@ shadow_enabled = true
 
 [node name="Assentos" type="Node3D" parent="."]
 
+; A rotacao de cada assento vira o personagem para o centro da mesa. Os
+; personagens NAO ficam na cena: Main os instancia conforme a escolha do
+; menu e o sorteio (ver Scripts/Elenco.gd).
+
 [node name="Assento0" type="Marker3D" parent="Assentos"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.15)
 
-[node name="Apresentadora" parent="Assentos/Assento0" instance=ExtResource("6_apresentadora")]
-
 [node name="Assento1" type="Marker3D" parent="Assentos"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.55, 0, -0.35)
-
-[node name="Bruxa" parent="Assentos/Assento1" instance=ExtResource("7_bruxa")]
-transform = Transform3D(0.2203, 0, 0.9755, 0, 1, 0, -0.9755, 0, 0.2203, 0, 0, 0)
+transform = Transform3D(0.2203, 0, 0.9755, 0, 1, 0, -0.9755, 0, 0.2203, -1.55, 0, -0.35)
 
 [node name="Assento2" type="Marker3D" parent="Assentos"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.55, 0, -0.2)
-
-[node name="Heroi" parent="Assentos/Assento2" instance=ExtResource("8_heroi")]
-transform = Transform3D(0.128, 0, -0.9917, 0, 1, 0, 0.9917, 0, 0.128, 0, 0, 0)
+transform = Transform3D(0.128, 0, -0.9917, 0, 1, 0, 0.9917, 0, 0.128, 1.55, 0, -0.2)
 
 [node name="Assento3" type="Marker3D" parent="Assentos"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.45, 0, 0.55)
-
-[node name="Ciborgue" parent="Assentos/Assento3" instance=ExtResource("9_ciborgue")]
-transform = Transform3D(-0.355, 0, 0.935, 0, 1, 0, -0.935, 0, -0.355, 0, 0, 0)
+transform = Transform3D(-0.355, 0, 0.935, 0, 1, 0, -0.935, 0, -0.355, -1.45, 0, 0.55)
 
 [node name="HUD" parent="." instance=ExtResource("5_hud")]

@@ -27,9 +27,8 @@ const MAT_CABELO := "Esp_Cabelo"
 
 ## O que o espectador segura, e a animação de festa que combina com aquilo.
 const ADERECOS_MAO := {
-	"Acc_Plaquinha": "LevantarPlaquinha",
-	"Acc_PlacaRobo": "LevantarPlaquinha",
-	"Acc_PlacaOvni": "LevantarPlaquinha",
+	"Acc_RoboHaste": "LevantarPlaquinha",
+	"Acc_OvniHaste": "LevantarPlaquinha",
 	"Acc_Martelo": "LevantarPlaquinha",
 	"Acc_Frufru": "AgitarFrufru",
 }

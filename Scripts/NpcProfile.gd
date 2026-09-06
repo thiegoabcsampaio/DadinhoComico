@@ -16,3 +16,9 @@ extends Resource
 @export_range(0.0, 1.0) var cautela: float = 0.5
 ## Chance de exibir um tique nervoso ao blefar em aposta arriscada (Etapa 6).
 @export_range(0.0, 1.0) var frequencia_tells: float = 0.5
+
+## Cor do personagem no log da partida e no cartão do menu.
+@export var cor: Color = Color(0.9, 0.9, 0.9)
+## Nó de adereço no Espectador.glb que a plateia levanta por este
+## personagem (ex.: "Acc_Martelo"). Vazio = a torcida não tem símbolo dele.
+@export var adereco_torcida: String = ""
