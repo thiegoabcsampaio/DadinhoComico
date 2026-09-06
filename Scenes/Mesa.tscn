@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3]
+
+; Cena da mesa (vazia por enquanto).
+; Placeholder: um BoxMesh simples representando a superfície da mesa.
+
+[sub_resource type="BoxMesh" id="BoxMesh_mesa"]
+size = Vector3(2.4, 0.12, 1.4)
+
+[node name="Mesa" type="Node3D"]
+
+[node name="Placeholder" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.06, 0)
+mesh = SubResource("BoxMesh_mesa")
