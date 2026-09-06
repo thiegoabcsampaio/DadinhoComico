@@ -4,16 +4,16 @@
 		"sua_vez": "Sua vez!",
 		"vez_de": "Vez de %s...",
 		"dudo": "DESCONFIO!",
-		"info_rodada": "Rodada %d  —  Aposta atual: %s",
-		"sem_aposta": "nenhuma",
+		"info_rodada": "Rodada %d  —  Pedido atual: %s",
+		"sem_aposta": "nenhum",
 		"info_aposta": "%s (%s)",
 		"dados_jogador": "%s: %d",
-		"revelacao": "Face %d apareceu %d vez(es) — aposta %s. %s perde 1 dado.",
-		"verdadeira": "VERDADEIRA",
+		"revelacao": "Face %d apareceu %d vez(es) — pedido %s. %s perde 1 dado.",
+		"verdadeira": "VERDADEIRO",
 		"mentira": "MENTIRA",
 		"eliminado": "%s ficou sem dados! CASTIGO!",
 		"vencedor": "Fim de jogo — %s venceu!",
-		"botao_apostar": "Apostar",
+		"botao_apostar": "Pedir",
 		"botao_dudo": "Desconfio!",
 		"botao_ver_dados": "Ver Dados",
 		"titulo_quantidade": "Quantidade",
@@ -28,7 +28,10 @@
 		"titulo_escolha": "Escolha quem você vai ser na mesa",
 		"botao_jogar": "Jogar",
 		"log_rodada": "Rodada %d",
-		"titulo_log": "Histórico da partida"
+		"titulo_log": "Histórico da partida",
+		"ultimo_pedido": "Precisa superar: %s",
+		"pedido_livre": "Mesa livre: peça o que quiser",
+		"titulo_rodada": "Rodada %d"
 	},
 
 	"apresentadora": {
@@ -47,7 +50,7 @@
 			"A tia ouviu, a tia anotou, a tia vai ganhar."
 		],
 		"apostas": [
-			"Baixinhos, eu digo {aposta}! Quem acredita levanta a mão!",
+			"Baixinhos, eu peço {aposta}! Quem acredita levanta a mão!",
 			"Olha só: {aposta}! Eu sinto que a sorte tá do meu lado hoje!",
 			"{aposta}, baixinhos! Confia na tia!",
 			"Vamos animar essa mesa: {aposta}!"
@@ -89,7 +92,7 @@
 			"Ri agora, chora depois. Rima pronta, dado na mesa."
 		],
 		"apostas": [
-			"Ocê vai ver, meu bem: {aposta}, e eu num minto pra ninguém!",
+			"Ocê vai ver, meu bem: peço {aposta}, e eu num minto pra ninguém!",
 			"Bebi minha poção e digo com precisão: {aposta}!",
 			"{aposta}, sô! Duvida? Pois num duvide, não!",
 			"Vixe, minha bola de cristal falou: {aposta}!"
@@ -132,7 +135,7 @@
 		],
 		"apostas": [
 			"{aposta}! Não contavam com a minha aritmética!",
-			"Como diz o ditado: quem aposta cedo, dado ajuda. {aposta}!",
+			"Como diz o ditado: quem pede cedo, dado ajuda. {aposta}!",
 			"{aposta}! Minhas anteninhas de vinil nunca falham!",
 			"Mais vale um dado na mão do que dois voando: {aposta}!"
 		],
@@ -180,7 +183,7 @@
 		],
 		"insultos": [
 			"Hasta la vista, dadinho. Desconfio, {nome}.",
-			"Desconfio. Sua aposta viola três leis da estatística.",
+			"Desconfio. Seu pedido viola três leis da estatística.",
 			"Detectada anomalia na sua história, {nome}. Desconfio."
 		],
 		"defesas": [
@@ -200,9 +203,16 @@
 	},
 
 	"narrador": {
+		"hora_castigo": [
+			"Hora da Zoeira!",
+			"Hora do Mico!",
+			"Hora da Travessura!",
+			"Hora do Vexame!",
+			"Hora da Peripécia!"
+		],
 		"resultado": [
-			"Face {face} apareceu {contagem} vez(es): aposta {veredicto}! {perdedor} perde um dado.",
-			"Contagem oficial: {contagem} dado(s) com a face {face}. Aposta {veredicto}, {perdedor} paga."
+			"Face {face} apareceu {contagem} vez(es): pedido {veredicto}! {perdedor} perde um dado.",
+			"Contagem oficial: {contagem} dado(s) com a face {face}. Pedido {veredicto}: {perdedor} perde um dado."
 		]
 	}
 }

@@ -37,6 +37,9 @@ var posicao_base := Vector2.ZERO
 var _alvo: Node3D
 var _camera: Camera3D
 var _restante := 0.0
+## Quando preenchido, o balão fica preso a este controle da HUD em vez de
+## seguir um personagem na mesa (é o caso do jogador, que olha para o painel).
+var _alvo_hud: Control
 
 @onready var _texto: Label = %Texto
 
@@ -51,6 +54,13 @@ func _ready() -> void:
 func configurar(alvo: Node3D, camera: Camera3D) -> void:
 	_alvo = alvo
 	_camera = camera
+
+
+## Prende o balão logo acima de um painel da HUD. Usado no jogador: a fala
+## dele nasce onde ele está olhando, junto dos botões, e não lá no fundo
+## da mesa em cima do próprio boneco.
+func ancorar_na_hud(controle: Control) -> void:
+	_alvo_hud = controle
 
 
 func mostrar(texto: String, duracao: float) -> void:
@@ -75,6 +85,11 @@ func _process(delta: float) -> void:
 
 
 func _reposicionar() -> void:
+	if _alvo_hud != null:
+		var painel := _alvo_hud.get_global_rect()
+		posicao_base = Vector2(painel.get_center().x - size.x * 0.5, painel.position.y - size.y - ALTURA_CAUDA)
+		position = posicao_base + desvio
+		return
 	if _alvo == null or _camera == null:
 		return
 	var mundo := _alvo.global_position + deslocamento

@@ -17,14 +17,18 @@ signal encerrar_solicitado()
 signal ver_dados_alternado(ativo: bool)
 ## O jogador escolheu uma provocação para dizer ao NPC [alvo].
 signal provocacao_escolhida(texto: String, alvo: int)
+## Não há mais nenhuma fala na fila: a partida pode seguir.
+signal fila_vazia()
 
 const CENA_BALAO := preload("res://Scenes/BalaoDialogo.tscn")
 const DURACAO_BALAO := 2.5
 
 ## Balão da revelação, preso ao centro da mesa (não é um jogador).
 const NARRADOR := -1
-## Espaço mínimo entre dois balões na tela.
+## Espaço mínimo entre o balão e o log aberto.
 const FOLGA_BALAO := 10.0
+## Respiro entre uma fala e a seguinte.
+const INTERVALO_FALA := 0.2
 
 ## Ver Dados: tempo do voo dos dados entre a mesa e o painel.
 const DURACAO_ZOOM := 0.4
@@ -69,6 +73,8 @@ var _dados_voando: Array[Control] = []
 var _camada_efeitos: Control
 ## Log de histórico da partida, à esquerda.
 var _log: LogHistorico
+## Destaque do pedido a superar, logo abaixo de "Sua vez!".
+var _label_pedido: Label
 ## Ícone que abre e fecha o log.
 var _botao_log: Button
 ## Botão Falar e o painel de provocações (falas dinâmicas).
@@ -78,6 +84,12 @@ var _painel_falas: PanelContainer
 var cores_jogadores := {}
 ## Os dados ficam parados no painel enquanto Ver Dados está ligado.
 var _dados_parados := false
+## Falas esperando a vez: { "id": int, "texto": String, "duracao": float }.
+var _fila: Array[Dictionary] = []
+var _balao_atual: BalaoDialogo
+var _intervalo := 0.0
+## Verdadeiro entre a primeira fala enfileirada e o esvaziamento da fila.
+var _falando := false
 
 
 func _t(chave: String) -> String:
@@ -111,11 +123,48 @@ func _ready() -> void:
 		ver_dados_alternado.emit(ativo))
 	_painel_dados.visible = false
 	_label_status.text = ""
+	# Reserva o espaço da linha de dados: com o rótulo vazio o retângulo
+	# encolhia e os dados pousavam fora do painel.
+	_label_meus_dados.custom_minimum_size = Vector2(TAMANHO_DADO.x * 3.0 + 20.0, TAMANHO_DADO.y)
+	_label_meus_dados.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_criar_pedido()
 	_criar_camada_efeitos()
 	_criar_log()
 	_criar_falas()
 	_preparar_game_feel()
 	habilitar_vez(false)
+
+
+## Logo abaixo de "Sua vez!": o que está na mesa e precisa ser superado.
+## Em amarelo, porque em branco se confundia com o resto do texto.
+func _criar_pedido() -> void:
+	_label_pedido = Label.new()
+	_label_pedido.name = "LabelPedido"
+	_label_pedido.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_label_pedido.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_label_pedido.add_theme_font_size_override("font_size", 22)
+	_label_pedido.add_theme_color_override("font_color", Color(1.0, 0.86, 0.25))
+	_label_pedido.add_theme_color_override("font_outline_color", Color(0.08, 0.06, 0.05))
+	_label_pedido.add_theme_constant_override("outline_size", 6)
+	add_child(_label_pedido)
+	_label_pedido.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_label_pedido.offset_left = -420.0
+	_label_pedido.offset_right = 420.0
+	_label_pedido.offset_top = -306.0
+	_label_pedido.offset_bottom = -272.0
+
+
+## Atualiza o destaque do pedido a superar (vazio fora da vez do jogador).
+func _atualizar_pedido() -> void:
+	if _label_pedido == null:
+		return
+	if not _vez_ativa or _jogo == null:
+		_label_pedido.text = ""
+		return
+	if _jogo.aposta_atual == null:
+		_label_pedido.text = _t("pedido_livre")
+	else:
+		_label_pedido.text = DialogueLoader.get_fmt("ui", "ultimo_pedido", [str(_jogo.aposta_atual)])
 
 
 # --------------------------------------------------------- Log da partida
@@ -341,6 +390,13 @@ func animar_dados(origem: Vector3, faces: Array, entrando: bool) -> void:
 		return
 	if _camera.is_position_behind(origem):
 		return
+	# O painel acabou de ficar visível; sem esperar um quadro, o retângulo
+	# dele ainda é o antigo e os dados pousavam em lugares diferentes.
+	_dados_parados = entrando
+	_atualizar_meus_dados()
+	await get_tree().process_frame
+	if _dados_parados != entrando:
+		return
 
 	var na_mesa := _camera.unproject_position(origem) - TAMANHO_DADO * 0.5
 	var centro_painel := _label_meus_dados.get_global_rect().get_center()
@@ -367,9 +423,6 @@ func animar_dados(origem: Vector3, faces: Array, entrando: bool) -> void:
 			tween.tween_property(icone, "modulate:a", 0.0, 0.18)
 			tween.tween_callback(icone.queue_free)
 
-	_dados_parados = entrando
-	_atualizar_meus_dados()
-
 
 func _limpar_dados_voando() -> void:
 	for icone in _dados_voando:
@@ -378,25 +431,55 @@ func _limpar_dados_voando() -> void:
 	_dados_voando.clear()
 
 
-## Dado desenhado como no seletor de faces: número escuro em ficha clara.
-func _criar_icone_dado(face: int) -> Label:
-	var icone := Label.new()
-	icone.text = str(face)
+## Dado branco com pintas, desenhado como a face de um dado de verdade.
+## Antes era um número em ficha amarela e se confundia com os botões.
+func _criar_icone_dado(face: int) -> Control:
+	var icone := IconeDado.new()
+	icone.face = face
 	icone.size = TAMANHO_DADO
 	icone.custom_minimum_size = TAMANHO_DADO
 	icone.pivot_offset = TAMANHO_DADO * 0.5
-	icone.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	icone.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	icone.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	icone.add_theme_font_size_override("font_size", 26)
-	icone.add_theme_color_override("font_color", Color(0.12, 0.1, 0.08))
-	var caixa := StyleBoxFlat.new()
-	caixa.bg_color = Color(0.99, 0.86, 0.35)
-	caixa.border_color = Color(0.15, 0.12, 0.1)
-	caixa.set_border_width_all(3)
-	caixa.set_corner_radius_all(9)
-	icone.add_theme_stylebox_override("normal", caixa)
 	return icone
+
+
+## Face de dado desenhada: fundo branco de cantos arredondados e as pintas
+## na disposição clássica.
+class IconeDado:
+	extends Control
+
+	const COR_FACE := Color(0.98, 0.98, 0.96)
+	const COR_PINTA := Color(0.12, 0.1, 0.1)
+	const COR_BORDA := Color(0.35, 0.33, 0.30)
+	## Onde ficam as pintas de cada face, em coordenadas de -1 a 1.
+	const PINTAS := {
+		1: [Vector2(0, 0)],
+		2: [Vector2(-1, -1), Vector2(1, 1)],
+		3: [Vector2(-1, -1), Vector2(0, 0), Vector2(1, 1)],
+		4: [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)],
+		5: [Vector2(-1, -1), Vector2(1, -1), Vector2(0, 0), Vector2(-1, 1), Vector2(1, 1)],
+		6: [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 0), Vector2(1, 0), Vector2(-1, 1), Vector2(1, 1)],
+	}
+
+	var face := 1
+
+
+	func _ready() -> void:
+		resized.connect(queue_redraw)
+
+
+	func _draw() -> void:
+		var caixa := StyleBoxFlat.new()
+		caixa.bg_color = COR_FACE
+		caixa.border_color = COR_BORDA
+		caixa.set_border_width_all(2)
+		caixa.set_corner_radius_all(int(size.x * 0.22))
+		draw_style_box(caixa, Rect2(Vector2.ZERO, size))
+		var centro := size * 0.5
+		var passo := size.x * 0.26
+		var raio := size.x * 0.09
+		for p in PINTAS.get(face, PINTAS[1]):
+			draw_circle(centro + Vector2(p) * passo, raio, COR_PINTA)
 
 
 ## [ancoras]: jogador_id -> Node3D onde o balão de fala se prende.
@@ -415,6 +498,8 @@ func configurar(jogo: GameManager, humano: int, camera: Camera3D, ancoras: Dicti
 			balao.deslocamento = Vector3(0.0, -0.12, 0.0)
 			balao.virar_narrador()
 		balao.configurar(ancoras[id], camera)
+		if id == humano:
+			balao.ancorar_na_hud(_painel_acoes)
 		_baloes[id] = balao
 
 	jogo.rodada_iniciada.connect(_ao_iniciar_rodada)
@@ -446,59 +531,72 @@ func habilitar_vez(ativa: bool) -> void:
 		_face = minima.face
 		_label_status.text = _t("sua_vez")
 	_atualizar_seletor()
+	_atualizar_pedido()
 
 
-## Mostra a fala no balão do personagem e registra no log da partida.
+## Enfileira uma fala. Só um balão aparece por vez, na ordem em que foi
+## pedido: quando vários falavam juntos não dava tempo de ler nenhum. O log
+## recebe a linha na hora, mesmo que o balão só apareça daqui a pouco.
 func mostrar_balao(jogador_id: int, texto: String, duracao: float = DURACAO_BALAO) -> void:
-	if _baloes.has(jogador_id):
-		_baloes[jogador_id].mostrar(texto, duracao)
 	if jogador_id == NARRADOR:
 		registrar_evento(texto)
 	else:
 		registrar_log(jogador_id, texto)
+	if not _baloes.has(jogador_id):
+		return
+	_fila.append({ "id": jogador_id, "texto": texto, "duracao": duracao })
+	_falando = true
 
 
-## Dois personagens falando ao mesmo tempo (insulto e defesa) deixavam os
-## balões um por cima do outro. Aqui o de baixo fica no lugar e os que
-## encostam nele sobem, na ordem de quem está mais ao fundo da mesa.
-func _process(_delta: float) -> void:
+## Ainda há fala no ar ou esperando a vez? Main usa para segurar a jogada
+## seguinte até a mesa terminar de falar.
+func falas_pendentes() -> bool:
+	return _falando
+
+
+func _process(delta: float) -> void:
 	# A legenda do resultado ocupa o centro da mesa, onde também fica o texto
 	# de status. Enquanto ela estiver no ar, o status sai da frente.
 	if _baloes.has(NARRADOR):
 		_label_status.visible = not _baloes[NARRADOR].visible
+	_avancar_fila(delta)
+	_desviar_do_log()
 
-	var visiveis: Array[BalaoDialogo] = []
-	for id in _baloes:
-		var balao: BalaoDialogo = _baloes[id]
-		if balao.visible:
-			balao.desvio = Vector2.ZERO
-			visiveis.append(balao)
-	if visiveis.size() < 2:
+
+## Toca a fila: um balão de cada vez, com um respiro entre eles.
+func _avancar_fila(delta: float) -> void:
+	if _balao_atual != null:
+		if _balao_atual.visible:
+			return
+		_balao_atual = null
+		_intervalo = INTERVALO_FALA
 		return
-	# Quem está mais embaixo na tela (mais perto da câmera) mantém o lugar.
-	visiveis.sort_custom(func(a: BalaoDialogo, b: BalaoDialogo) -> bool:
-		return a.posicao_base.y > b.posicao_base.y)
+	if _intervalo > 0.0:
+		_intervalo -= delta
+		return
+	if not _fila.is_empty():
+		var fala: Dictionary = _fila.pop_front()
+		_balao_atual = _baloes[fala["id"]]
+		_balao_atual.mostrar(fala["texto"], fala["duracao"])
+		return
+	if _falando:
+		_falando = false
+		fila_vazia.emit()
 
-	# Só desvia do log quando ele está aberto.
-	var log_rect := _log.get_global_rect() if _log != null and _log.visible else Rect2()
+
+## Com o log aberto, o balão da esquerda cairia sobre o histórico: desliza.
+func _desviar_do_log() -> void:
+	if _balao_atual == null or _log == null or not _log.visible:
+		return
+	_balao_atual.desvio = Vector2.ZERO
+	var log_rect := _log.get_global_rect()
+	var retangulo := Rect2(_balao_atual.posicao_base, _balao_atual.size)
+	if not retangulo.intersects(log_rect):
+		return
 	var largura := get_viewport().get_visible_rect().size.x
-	var ocupados: Array[Rect2] = []
-	for balao in visiveis:
-		var retangulo := Rect2(balao.posicao_base, balao.size)
-		# O log fica na coluna da esquerda: balão que cairia sobre ele
-		# desliza para a direita, em vez de cobrir o histórico.
-		if log_rect.has_area() and retangulo.intersects(log_rect):
-			retangulo.position.x = minf(log_rect.end.x + FOLGA_BALAO, largura - retangulo.size.x - FOLGA_BALAO)
-		var subiu := true
-		while subiu:
-			subiu = false
-			for outro in ocupados:
-				if retangulo.intersects(outro):
-					retangulo.position.y = outro.position.y - retangulo.size.y - FOLGA_BALAO
-					subiu = true
-		balao.desvio = retangulo.position - balao.posicao_base
-		balao.position = retangulo.position
-		ocupados.append(retangulo)
+	retangulo.position.x = minf(log_rect.end.x + FOLGA_BALAO, largura - retangulo.size.x - FOLGA_BALAO)
+	_balao_atual.desvio = retangulo.position - _balao_atual.posicao_base
+	_balao_atual.position = retangulo.position
 
 
 func mostrar_status(texto: String) -> void:
@@ -538,6 +636,7 @@ func _atualizar_info() -> void:
 	for id in _jogo.turnos.ativos():
 		partes.append(DialogueLoader.get_fmt("ui", "dados_jogador", [_jogo.nome(id), _jogo.dados.quantidade_dados(id)]))
 	_label_mesa.text = "   ·   ".join(partes)
+	_atualizar_pedido()
 
 
 ## Enquanto os dados estão parados no painel, o número seria repetição.
@@ -605,9 +704,19 @@ func _ao_eliminar(jogador_id: int) -> void:
 		_entrar_modo_espectador()
 
 
+## Some com os dados parados no painel. Sem isto eles ficavam flutuando na
+## tela depois que o painel de jogada saía (fim de partida ou eliminação).
+func _esconder_dados() -> void:
+	_botao_ver_dados.set_pressed_no_signal(false)
+	_painel_dados.visible = false
+	_dados_parados = false
+	_limpar_dados_voando()
+
+
 ## Humano fora: some o painel de jogada, aparecem Acelerar / Encerrar.
 func _entrar_modo_espectador() -> void:
 	habilitar_vez(false)
+	_esconder_dados()
 	_painel_acoes.visible = false
 	_painel_espectador.visible = true
 	_botao_acelerar.visible = true
@@ -618,6 +727,7 @@ func _ao_terminar(vencedor: int) -> void:
 	_label_status.text = DialogueLoader.get_fmt("ui", "vencedor", [_jogo.nome(vencedor)])
 	registrar_evento(_label_status.text)
 	habilitar_vez(false)
+	_esconder_dados()
 	# Fim de jogo: só resta começar outro.
 	_painel_acoes.visible = false
 	_painel_espectador.visible = true

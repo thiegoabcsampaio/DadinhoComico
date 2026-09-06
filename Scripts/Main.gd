@@ -183,12 +183,22 @@ func _iniciar_rodada() -> void:
 	_processar_turno()
 
 
+## Espera a mesa terminar de falar. Sem isto, a jogada seguinte atropela o
+## balão anterior e ninguém consegue ler.
+func _esperar_baloes() -> void:
+	if hud.falas_pendentes():
+		await hud.fila_vazia
+
+
 ## Chamado após cada jogada. Para no humano (HUD liberada) ou encadeia NPCs.
 func _processar_turno() -> void:
 	if not jogo.estado.esta_em(StateManager.Estado.APOSTANDO):
 		return
 	var id := jogo.jogador_atual()
 	if id == JOGADOR_HUMANO:
+		await _esperar_baloes()
+		if not jogo.estado.esta_em(StateManager.Estado.APOSTANDO) or jogo.jogador_atual() != id:
+			return
 		hud.habilitar_vez(true)
 		# Provocações do personagem do jogador contra quem joga em seguida.
 		var alvo := jogo.turnos.proximo_apos(JOGADOR_HUMANO)
@@ -199,6 +209,7 @@ func _processar_turno() -> void:
 		return
 
 	hud.habilitar_vez(false)
+	await _esperar_baloes()
 	await get_tree().create_timer(atraso_npc).timeout
 	# A rodada pode ter terminado enquanto esperávamos.
 	if not jogo.estado.esta_em(StateManager.Estado.APOSTANDO) or jogo.jogador_atual() != id:
@@ -249,7 +260,7 @@ func _ao_provocar(texto: String, alvo: int) -> void:
 	hud.mostrar_balao(JOGADOR_HUMANO, texto)
 	if _controladores.has(JOGADOR_HUMANO):
 		_controladores[JOGADOR_HUMANO].tocar("Apostar")
-	await get_tree().create_timer(HudController.DURACAO_BALAO * 0.55).timeout
+	# A resposta entra na fila logo atrás: sai quando a provocação sair.
 	if _ias.has(alvo):
 		_falar(alvo, "reacoes_provocacao")
 
@@ -312,6 +323,8 @@ func _reagir_e_agendar(resultado: BetValidator.ResultadoDudo) -> void:
 	if eliminado:
 		_castigar(resultado.perdedor)
 	await get_tree().create_timer(maxf(0.0, atraso_entre_rodadas - atraso_reacao)).timeout
+	# A rodada nova só começa quando a mesa terminou de comentar a anterior.
+	await _esperar_baloes()
 	_iniciar_rodada()
 
 
