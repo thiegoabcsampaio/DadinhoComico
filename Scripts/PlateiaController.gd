@@ -25,13 +25,19 @@ const MAT_PELE := "Esp_Pele"
 const MAT_ROUPA := "Esp_Roupa"
 const MAT_CABELO := "Esp_Cabelo"
 
-## Acessórios (nós dentro do Skeleton3D) e a animação que combina com cada um.
-const ACESSORIOS := {
+## O que o espectador segura, e a animação de festa que combina com aquilo.
+const ADERECOS_MAO := {
 	"Acc_Plaquinha": "LevantarPlaquinha",
+	"Acc_PlacaRobo": "LevantarPlaquinha",
+	"Acc_PlacaOvni": "LevantarPlaquinha",
+	"Acc_Martelo": "LevantarPlaquinha",
 	"Acc_Frufru": "AgitarFrufru",
-	"Acc_Oculos": "",
-	"Acc_Bone": "",
 }
+## O que o espectador usa na cabeça. Cada um pode ter os dois, um, ou nenhum.
+const ADERECOS_CABECA := ["Acc_Oculos", "Acc_Bone", "Acc_ChapeuBruxa", "Acc_CabecaRobo"]
+## Chance de sortear cada tipo de adereço.
+const CHANCE_MAO := 0.8
+const CHANCE_CABECA := 0.55
 
 ## Tons de pele, do mais claro ao mais escuro. A plateia é diversa.
 const PELES: Array[Color] = [
@@ -151,13 +157,21 @@ func _vestir(espectador: Node3D) -> void:
 				corpo.set_surface_override_material(i, proprio)
 				break
 
-	# Um acessório por espectador, ou nenhum (a plateia não é uniforme).
-	var nomes := ACESSORIOS.keys()
-	var escolhido: String = nomes[_rng.randi() % nomes.size()] if _rng.randf() < 0.75 else ""
-	for nome in nomes:
+	# Um adereço na mão e um na cabeça, sorteados à parte: assim aparecem
+	# martelos do Herói ao lado de plaquinhas do robô e chapéus de bruxa,
+	# e a plateia não fica uniforme. Alguns têm cabeça de robô, coitado do
+	# Ciborgue, que não tinha ninguém parecido com ele na arquibancada.
+	var mao: String = ""
+	if _rng.randf() < CHANCE_MAO:
+		var maos := ADERECOS_MAO.keys()
+		mao = maos[_rng.randi() % maos.size()]
+	var cabeca: String = ""
+	if _rng.randf() < CHANCE_CABECA:
+		cabeca = ADERECOS_CABECA[_rng.randi() % ADERECOS_CABECA.size()]
+	for nome in ADERECOS_MAO.keys() + ADERECOS_CABECA:
 		var acessorio := espectador.find_child(nome, true, false) as MeshInstance3D
 		if acessorio != null:
-			acessorio.visible = nome == escolhido
+			acessorio.visible = nome == mao or nome == cabeca
 
 	var player := espectador.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if player == null:
@@ -166,8 +180,8 @@ func _vestir(espectador: Node3D) -> void:
 		player.get_animation(nome).loop_mode = Animation.LOOP_LINEAR
 	_espectadores.append({
 		"player": player,
-		# Animação de festa que combina com o acessório deste espectador.
-		"festa": ACESSORIOS.get(escolhido, ""),
+		# Animação de festa que combina com o que ele tem na mão.
+		"festa": ADERECOS_MAO.get(mao, ""),
 	})
 	_tocar(_espectadores[-1], "Idle")
 

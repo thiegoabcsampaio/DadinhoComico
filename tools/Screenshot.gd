@@ -85,6 +85,11 @@ func _ready() -> void:
 			if modo == "rosto_olhar":
 				for id in main._controladores:
 					main._controladores[id].olhar_para(main.camera, 6.0)
+		"plateia":
+			# Close na arquibancada da esquerda, para conferir os adereços.
+			main.camera.position = Vector3(-2.6, 1.7, -0.4)
+			main.camera.look_at(Vector3(-4.2, 1.0, -2.6), Vector3.UP)
+			main.hud.visible = false
 		"fps":
 			# Custo real da cena: sem sincronia vertical, mede o pior quadro.
 			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)

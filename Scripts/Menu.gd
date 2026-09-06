@@ -15,6 +15,8 @@ const VOLUME_TEMA := -12.0
 const FADE := 0.5
 ## Ordem de exibição; as chaves são nós em Scenes/NPCs/ e Main.PERFIS.
 const PERSONAGENS := ["Apresentadora", "Bruxa", "Heroi", "Ciborgue"]
+## Retrato de cada personagem, renderizado no Blender.
+const RETRATOS := "res://Assets/UI/Retratos/%s.png"
 ## Cor do cartão de cada personagem (as mesmas do log em Main.CORES).
 const COR_CARTAO := {
 	"Apresentadora": Color(1.0, 0.55, 0.75),
@@ -46,7 +48,15 @@ func _ready() -> void:
 		var botao := Button.new()
 		botao.text = DialogueLoader.get_text(nome.to_lower(), "nome")
 		botao.toggle_mode = true
-		botao.custom_minimum_size = Vector2(150.0, 64.0)
+		botao.custom_minimum_size = Vector2(160.0, 190.0)
+		# Retrato renderizado no Blender (Assets/UI/Retratos), acima do nome.
+		var retrato := RETRATOS % nome
+		if ResourceLoader.exists(retrato):
+			botao.icon = load(retrato)
+			botao.expand_icon = true
+			botao.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+			botao.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			botao.add_theme_constant_override("h_separation", 0)
 		_estilizar(botao, COR_CARTAO.get(nome, Color(1.0, 0.84, 0.2)))
 		botao.pressed.connect(_escolher.bind(nome, botao))
 		_lista.add_child(botao)

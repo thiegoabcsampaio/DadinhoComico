@@ -62,22 +62,22 @@ show de auditorio, em dialogues.json (ui.hora_castigo).
 
 ## Bloco A — Fable (Blender e textos)
 
-- [ ] A1. MINIATURAS dos 4 personagens para o menu: render de retrato
+- [x] A1. MINIATURAS dos 4 personagens para o menu: render de retrato
       (busto, fundo transparente, 256x256 PNG) em Assets/UI/Retratos/.
-- [ ] A2. ADERECOS DA PLATEIA, um por personagem, como malhas separadas no
+- [x] A2. ADERECOS DA PLATEIA, um por personagem, como malhas separadas no
       Espectador.glb (mesmo esquema de Acc_*): martelo do Heroi, plaquinha
       com o rosto do robo, plaquinha com o disco voador, chapeu de bruxa.
       Criatividade liberada (bandeirinha, mao de espuma, etc.).
-- [ ] A3. ESPECTADOR ROBO: variante de cabeca metalica para alguns lugares
+- [x] A3. ESPECTADOR ROBO: variante de cabeca metalica para alguns lugares
       da plateia (o Ciborgue nao tem ninguem parecido com ele). A torcida
       continua sorteada: robo na plateia nao precisa torcer pelo Ciborgue.
-- [ ] A4. VASSOURA para a Bruxa (vitoria) e o que mais os finais pedirem.
-- [ ] A5. TEXTOS em dialogues.json: as 5 opcoes de "Hora da ...", as falas de
+- [x] A4. VASSOURA para a Bruxa (vitoria) e o que mais os finais pedirem.
+- [x] A5. TEXTOS em dialogues.json: as 5 opcoes de "Hora da ...", as falas de
       vitoria e de derrota por personagem, e a linguagem nova da tabela.
 
 ## Bloco C — Opus, segunda leva (com os assets prontos)
 
-- [ ] C1. MENU com as miniaturas (cartao = retrato + nome + frase).
+- [x] C1. MENU com as miniaturas (cartao = retrato + nome + frase).
 - [ ] C2. FIM DE PARTIDA por personagem, com confete:
       - Vitoria do jogador: confetes na tela, o personagem levanta o braco e
         faz o numero dele. Bruxa: monta na vassoura, encolhe e sai voando com
@@ -85,7 +85,7 @@ show de auditorio, em dialogues.json (ui.hora_castigo).
         aceso, "Game Over. Eu terminei com voce."
       - Apresentadora e Heroi: definir na mesma linha (nave e martelo).
       - Derrota do jogador: o vencedor faz o numero dele.
-- [ ] C3. PLATEIA com os adereços novos e alguns espectadores robo.
+- [x] C3. PLATEIA com os adereços novos e alguns espectadores robo.
 
 ## Bloco D — Fable (fechamento)
 
@@ -111,3 +111,17 @@ show de auditorio, em dialogues.json (ui.hora_castigo).
   quem e fraco blefa no susto, quem e forte blefa com criterio.
   Heroi (agressividade 0,85 -> 0,95) e Ciborgue (0,3 -> 0,65 e cautela
   0,9 -> 0,65) passaram a blefar bem mais. O nivel de cada um abre o log.
+
+## Notas do Bloco A e do C1/C3
+
+- Retratos: render Workbench 256x256 com fundo transparente. Workbench pinta com
+  material.diffuse_color (cor de viewport), nao com o Principled BSDF: foi preciso
+  sincronizar os 125 materiais antes de renderizar, senao sai tudo cinza.
+- Adereços: viraram dois sorteios independentes em PlateiaController -
+  ADERECOS_MAO (plaquinha, placa do robo, placa do OVNI, martelo, frufru) e
+  ADERECOS_CABECA (oculos, bone, chapeu de bruxa, cabeca de robo). Cada
+  espectador pode ter os dois, um ou nenhum; a animacao de festa vem do que
+  ele tem na mao.
+- Vassoura.glb exportada solta, para o final da Bruxa (C2).
+- Textos de vitoria e derrota: duas falas por personagem, incluindo o
+  "Game Over. Eu terminei com voce." do Ciborgue.

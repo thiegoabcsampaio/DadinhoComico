@@ -57,6 +57,14 @@ Pedido: %s",
 			"Bota na musica, baixinho, porque o show é meu!",
 			"A tia ouviu, a tia anotou, a tia vai ganhar."
 		],
+		"vitoria": [
+			"A tia venceu, baixinhos! Joga confete que hoje o brilho é meu!",
+			"Ganhei, ganhei! Quem é a rainha dos baixinhos? Sou eu!"
+		],
+		"derrota": [
+			"Parabéns, baixinho! A tia perde, mas perde brilhando.",
+			"Ah, não! Bom, pelo menos o cabelo continua perfeito."
+		],
 		"apostas": [
 			"Baixinhos, eu peço {aposta}! Quem acredita levanta a mão!",
 			"Olha só: {aposta}! Eu sinto que a sorte tá do meu lado hoje!",
@@ -98,6 +106,14 @@ Pedido: %s",
 			"Ocê fala, fala, e o dado num muda, sô!",
 			"Provoca a bruxa, viu? Vou te virar em sapo no fim da rodada!",
 			"Ri agora, chora depois. Rima pronta, dado na mesa."
+		],
+		"vitoria": [
+			"Ganhei, sô! Vou buscar a vassoura e sumir no céu, que aqui já deu!",
+			"Rima final pra ocê: quem duvida da bruxa, aprende a perder!"
+		],
+		"derrota": [
+			"Ocê ganhou, danado! Mas a bruxa volta na próxima lua.",
+			"Perdi, sô... vou embora na vassoura, resmungando."
 		],
 		"apostas": [
 			"Ocê vai ver, meu bem: peço {aposta}, e eu num minto pra ninguém!",
@@ -141,6 +157,14 @@ Pedido: %s",
 			"Foi sem querer querendo, mas vou vencer mesmo assim!",
 			"Isso é uma provocação? Meus dados riem por ultimo!"
 		],
+		"vitoria": [
+			"Não contavam com a minha astúcia! Nem eu, pra ser sincero!",
+			"Venci! Alguém me belisca... ai! Tá, é real mesmo."
+		],
+		"derrota": [
+			"Sigam-me os bons! Ah, não... hoje os bons foram embora.",
+			"Perdi por pouco! Por muito pouco. Tá, por muito."
+		],
 		"apostas": [
 			"{aposta}! Não contavam com a minha aritmética!",
 			"Como diz o ditado: quem pede cedo, dado ajuda. {aposta}!",
@@ -182,6 +206,14 @@ Pedido: %s",
 			"Provocação registrada. Irrelevante.",
 			"Humor detectado. Processando... não achei graça.",
 			"Eu voltarei. Com mais dados que você."
+		],
+		"vitoria": [
+			"Game Over. Eu terminei com você.",
+			"Missão cumprida. Você foi... desativado do jogo."
+		],
+		"derrota": [
+			"Derrota registrada. Iniciando... reinicialização.",
+			"Você venceu. Guardei seu rosto na memória permanente."
 		],
 		"apostas": [
 			"Probabilidade calculada. {aposta}.",
