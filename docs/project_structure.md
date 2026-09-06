@@ -57,6 +57,7 @@ DadinhoComico/
 │   ├── Mesa.tscn
 │   ├── HUD.tscn
 │   ├── Menu.tscn            (escolha de personagem; cena inicial do projeto)
+│   ├── Plateia.tscn         (arquibancadas + espectadores, montados em tempo de execucao)
 │   └── NPCs/
 │       ├── Apresentadora.tscn
 │       ├── Bruxa.tscn
@@ -75,6 +76,7 @@ DadinhoComico/
 │   ├── NpcController.gd     (animacoes do .glb: Idle, tells, Apostar, Dudo, Comemorar, Castigo)
 │   ├── MesaController.gd    (copos e dados fisicos: agitar, revelar, esconder)
 │   ├── Sfx.gd               (Sfx.tocar("nome") -> Assets/Audio/SFX/nome.wav)
+│   ├── PlateiaController.gd (monta e anima a plateia; diversidade por codigo)
 │   ├── OlharModifier.gd     (gira so o osso da cabeca na direcao de um alvo)
 │   ├── HudController.gd
 │   ├── PunishmentSystem.gd

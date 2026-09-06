@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+; Plateia do auditório (Etapa 7). PlateiaController monta as arquibancadas
+; e os espectadores por código: a diversidade (pele, roupa, cabelo,
+; acessório e fase da animação) é sorteada por instância.
+
+[ext_resource type="Script" path="res://Scripts/PlateiaController.gd" id="1_plateia"]
+
+[node name="Plateia" type="Node3D"]
+script = ExtResource("1_plateia")

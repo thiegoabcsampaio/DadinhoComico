@@ -41,6 +41,7 @@ const CORES := {
 @onready var mesa: MesaController = $Mesa
 @onready var castigos: PunishmentSystem = $Castigos
 @onready var efeitos: EfeitoTela = $Efeitos
+@onready var plateia: PlateiaController = $Plateia
 @onready var ambiente: WorldEnvironment = $WorldEnvironment
 ## Onde o balão do narrador (revelação) se prende: o centro da mesa.
 @onready var marcador_narrador: Marker3D = $MarcadorNarrador
@@ -76,6 +77,7 @@ func _ready() -> void:
 	jogo.iniciar_jogo(ids, DiceSystem.DADOS_INICIAIS, semente, nomes)
 
 	efeitos.configurar(camera, ambiente.environment)
+	plateia.acompanhar(jogo)
 
 	var ancoras := {}
 	for id in ids:

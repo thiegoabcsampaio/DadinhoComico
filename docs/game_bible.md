@@ -117,3 +117,12 @@ Cole este bloco no inicio da proxima sessao.
   e castigos; existe so durante a partida e reinicia no Novo jogo
 - Resultado da revelacao aparece tambem num balao do "narrador", no centro da mesa
 - Ver Dados: os dados voam do copo para o painel e FICAM la (nao viram numeros)
+
+## Plateia (Etapa 7)
+
+- Auditorio anos 90: duas arquibancadas ladeando a mesa, cerca de 40 pessoas
+- Diversidade obrigatoria: tons de pele do mais claro ao mais escuro, roupas
+  saturadas e cabelos variados, sorteados por espectador (nunca uma plateia igual)
+- Acessorios: plaquinha, frufru, oculos, bone - ou nenhum
+- Reacoes: murmurio na aposta, silencio no Desconfio, aplauso na revelacao,
+  festa (plaquinhas e frufrus) no castigo e no fim de jogo

@@ -150,10 +150,6 @@ Agentes: [F] [B] para assets, [O] para integracao Godot
 
 Pre-requisito: Bloco B de docs/blueprint_melhorias.md concluido.
 
-Progresso: assets do Fable prontos (Espectador.glb com 4 loops e 4 acessorios
-desligaveis, Arquibancada.glb, Estudio.glb ja integrado na Main, Tema_Menu.wav).
-Falta o lado Godot: PlateiaController, Plateia.tscn, musica no Menu e reacoes.
-
 Acoes:
 - Gerar via Blender MCP duas arquibancadas de estudio (esquerda e direita da
   camera, fora da mesa) em .glb, low-poly
@@ -184,3 +180,10 @@ Outputs esperados:
 
 Criterio de conclusao: plateia diversa e animada visivel na camera fixa
 reagindo as jogadas, sem queda de FPS no export Web; menu inicial funcional
+
+CONCLUIDA. Plateia de 42 espectadores em duas arquibancadas, cada um com
+pele, roupa, cabelo e acessorio sorteados e animacao em fase propria;
+reage a aposta (murmurio), Desconfio (silencio), revelacao (aplausos) e
+castigo/fim de jogo (plaquinhas e frufrus). Estudio no lugar do ceu e
+trilha no menu. Medido em 111 FPS a 1600x900 (Intel UHD, GL Compatibility),
+sem custo perceptivel da plateia; o teste no navegador fica para o deploy.

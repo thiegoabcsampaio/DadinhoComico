@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 ; Cena principal.
 ; - Main.gd: fluxo da partida (humano x 4 NPCs random)
@@ -20,6 +20,7 @@
 [ext_resource type="Script" path="res://Scripts/PunishmentSystem.gd" id="10_castigos"]
 [ext_resource type="Script" path="res://Scripts/EfeitoTela.gd" id="11_efeitos"]
 [ext_resource type="PackedScene" path="res://Assets/Models/Estudio.glb" id="12_estudio"]
+[ext_resource type="PackedScene" path="res://Scenes/Plateia.tscn" id="13_plateia"]
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMaterial_studio"]
 
@@ -64,6 +65,8 @@ light_energy = 0.8
 shadow_enabled = true
 
 [node name="Estudio" parent="." instance=ExtResource("12_estudio")]
+
+[node name="Plateia" parent="." instance=ExtResource("13_plateia")]
 
 [node name="Mesa" parent="." instance=ExtResource("4_mesa")]
 

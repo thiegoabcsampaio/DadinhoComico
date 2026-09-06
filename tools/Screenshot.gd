@@ -80,6 +80,20 @@ func _ready() -> void:
 			if modo == "rosto_olhar":
 				for id in main._controladores:
 					main._controladores[id].olhar_para(main.camera, 6.0)
+		"fps":
+			# Custo real da cena: sem sincronia vertical, mede o pior quadro.
+			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+			var amostras: Array[float] = []
+			for i in maxi(60, frames):
+				await get_tree().process_frame
+				if i > 90:
+					amostras.append(Engine.get_frames_per_second())
+			var soma := 0.0
+			var minimo := 9999.0
+			for v in amostras:
+				soma += v
+				minimo = minf(minimo, v)
+			print("FPS medio=%.0f  minimo=%.0f  amostras=%d" % [soma / maxf(1.0, amostras.size()), minimo, amostras.size()])
 		"assentos":
 			# Quem sentou em cada assento, para conferir o sorteio.
 			for id in main._controladores:

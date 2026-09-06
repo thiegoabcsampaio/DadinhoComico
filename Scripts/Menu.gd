@@ -7,6 +7,12 @@ extends Control
 ## (cartões, retrato, animação); a estrutura e os textos já estão aqui.
 
 const CENA_JOGO := "res://Scenes/Main.tscn"
+## Trilha do menu (Assets/Audio/Music). O loop está ligado no import.
+const TEMA := preload("res://Assets/Audio/Music/Tema_Menu.wav")
+## Volume da trilha; abaixo dos SFX, para não brigar com os cliques.
+const VOLUME_TEMA := -12.0
+## Tempo para a música sumir ao entrar na partida.
+const FADE := 0.5
 ## Ordem de exibição; as chaves são nós em Scenes/NPCs/ e Main.PERFIS.
 const PERSONAGENS := ["Apresentadora", "Bruxa", "Heroi", "Ciborgue"]
 ## Cor do cartão de cada personagem (as mesmas do log em Main.CORES).
@@ -18,6 +24,7 @@ const COR_CARTAO := {
 }
 
 var _escolhido := ""
+var _musica: AudioStreamPlayer
 
 @onready var _titulo: Label = %Titulo
 @onready var _subtitulo: Label = %Subtitulo
@@ -42,6 +49,12 @@ func _ready() -> void:
 		_lista.add_child(botao)
 	_estilizar(_botao_jogar, Color(1.0, 0.84, 0.2))
 	_botao_jogar.pressed.connect(_jogar)
+
+	_musica = AudioStreamPlayer.new()
+	_musica.stream = TEMA
+	_musica.volume_db = VOLUME_TEMA
+	add_child(_musica)
+	_musica.play()
 
 
 ## Mesmo estilo HQ da HUD: fundo saturado, borda grossa, cantos redondos.
@@ -78,8 +91,12 @@ func _escolher(nome: String, botao: Button) -> void:
 	_botao_jogar.disabled = false
 
 
+## A trilha sai devagar antes da mesa aparecer.
 func _jogar() -> void:
 	if _escolhido == "":
 		return
 	Partida.personagem = _escolhido
-	get_tree().change_scene_to_file(CENA_JOGO)
+	_botao_jogar.disabled = true
+	var tween := create_tween()
+	tween.tween_property(_musica, "volume_db", -40.0, FADE)
+	tween.tween_callback(func() -> void: get_tree().change_scene_to_file(CENA_JOGO))
