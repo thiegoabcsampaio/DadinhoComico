@@ -1,11 +1,11 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=13 format=3]
 
 ; Cena principal.
 ; - Main.gd: fluxo da partida (humano x 4 NPCs random)
 ; - GameManager: motor lógico (Etapa 2)
 ; - Camera3D estática com CameraSetup.gd
 ; - DirectionalLight3D simulando iluminação de estúdio de TV
-; - Mesa (placeholder) e Assentos com cápsulas placeholder dos NPCs
+; - Mesa (placeholder) e Assentos com as cenas dos NPCs (Scenes/NPCs/)
 ; - HUD (CanvasLayer) com botões e balões de fala
 
 [ext_resource type="Script" path="res://Scripts/Main.gd" id="1_main"]
@@ -13,6 +13,10 @@
 [ext_resource type="Script" path="res://Scripts/CameraSetup.gd" id="3_camera"]
 [ext_resource type="PackedScene" path="res://Scenes/Mesa.tscn" id="4_mesa"]
 [ext_resource type="PackedScene" path="res://Scenes/HUD.tscn" id="5_hud"]
+[ext_resource type="PackedScene" path="res://Scenes/NPCs/Apresentadora.tscn" id="6_apresentadora"]
+[ext_resource type="PackedScene" path="res://Scenes/NPCs/Bruxa.tscn" id="7_bruxa"]
+[ext_resource type="PackedScene" path="res://Scenes/NPCs/Heroi.tscn" id="8_heroi"]
+[ext_resource type="PackedScene" path="res://Scenes/NPCs/Ciborgue.tscn" id="9_ciborgue"]
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMaterial_studio"]
 
@@ -26,24 +30,6 @@ ambient_light_source = 3
 ambient_light_color = Color(0.85, 0.85, 0.9, 1)
 ambient_light_energy = 0.6
 tonemap_mode = 2
-
-[sub_resource type="CapsuleMesh" id="Capsula_npc"]
-radius = 0.25
-height = 1.1
-
-[sub_resource type="StandardMaterial3D" id="Mat_apresentadora"]
-albedo_color = Color(1, 0.85, 0.3, 1)
-
-[sub_resource type="StandardMaterial3D" id="Mat_bruxa"]
-albedo_color = Color(0.3, 0.7, 0.3, 1)
-
-[sub_resource type="StandardMaterial3D" id="Mat_heroi"]
-albedo_color = Color(0.85, 0.15, 0.15, 1)
-
-[sub_resource type="StandardMaterial3D" id="Mat_ciborgue"]
-albedo_color = Color(0.6, 0.6, 0.65, 1)
-metallic = 0.8
-roughness = 0.35
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_main")
@@ -72,33 +58,21 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.1)
 [node name="Assento1" type="Marker3D" parent="Assentos"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0.3)
 
-[node name="Placeholder" type="MeshInstance3D" parent="Assentos/Assento1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
-mesh = SubResource("Capsula_npc")
-surface_material_override/0 = SubResource("Mat_apresentadora")
+[node name="Apresentadora" parent="Assentos/Assento1" instance=ExtResource("6_apresentadora")]
 
 [node name="Assento2" type="Marker3D" parent="Assentos"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0, -1)
 
-[node name="Placeholder" type="MeshInstance3D" parent="Assentos/Assento2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
-mesh = SubResource("Capsula_npc")
-surface_material_override/0 = SubResource("Mat_bruxa")
+[node name="Bruxa" parent="Assentos/Assento2" instance=ExtResource("7_bruxa")]
 
 [node name="Assento3" type="Marker3D" parent="Assentos"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0, -1)
 
-[node name="Placeholder" type="MeshInstance3D" parent="Assentos/Assento3"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
-mesh = SubResource("Capsula_npc")
-surface_material_override/0 = SubResource("Mat_heroi")
+[node name="Heroi" parent="Assentos/Assento3" instance=ExtResource("8_heroi")]
 
 [node name="Assento4" type="Marker3D" parent="Assentos"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0.3)
 
-[node name="Placeholder" type="MeshInstance3D" parent="Assentos/Assento4"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
-mesh = SubResource("Capsula_npc")
-surface_material_override/0 = SubResource("Mat_ciborgue")
+[node name="Ciborgue" parent="Assentos/Assento4" instance=ExtResource("9_ciborgue")]
 
 [node name="HUD" parent="." instance=ExtResource("5_hud")]

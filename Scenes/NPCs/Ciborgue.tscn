@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+; NPC Ciborgue (Etapa 5).
+; O nó "Modelo" recebe o .glb definitivo (Assets/Models/Ciborgue.glb).
+; Enquanto o modelo não existe, uma cápsula placeholder ocupa o lugar.
+
+[sub_resource type="CapsuleMesh" id="Capsula_npc"]
+radius = 0.25
+height = 1.1
+
+[sub_resource type="StandardMaterial3D" id="Mat_Ciborgue"]
+albedo_color = Color(0.6, 0.6, 0.65, 1)
+metallic = 0.8
+roughness = 0.35
+
+[node name="Ciborgue" type="Node3D"]
+
+[node name="Modelo" type="Node3D" parent="."]
+
+[node name="Placeholder" type="MeshInstance3D" parent="Modelo"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+mesh = SubResource("Capsula_npc")
+surface_material_override/0 = SubResource("Mat_Ciborgue")

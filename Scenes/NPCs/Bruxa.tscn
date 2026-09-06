@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3]
+
+; NPC Bruxa (Etapa 5).
+; O nó "Modelo" recebe o .glb definitivo (Assets/Models/Bruxa.glb).
+; Enquanto o modelo não existe, uma cápsula placeholder ocupa o lugar.
+
+[sub_resource type="CapsuleMesh" id="Capsula_npc"]
+radius = 0.25
+height = 1.1
+
+[sub_resource type="StandardMaterial3D" id="Mat_Bruxa"]
+albedo_color = Color(0.3, 0.7, 0.3, 1)
+
+[node name="Bruxa" type="Node3D"]
+
+[node name="Modelo" type="Node3D" parent="."]
+
+[node name="Placeholder" type="MeshInstance3D" parent="Modelo"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+mesh = SubResource("Capsula_npc")
+surface_material_override/0 = SubResource("Mat_Bruxa")
