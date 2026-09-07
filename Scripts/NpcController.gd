@@ -98,6 +98,8 @@ func acender_olho(duracao: float = 2.5) -> void:
 	var malha := find_child("*", true, false) as MeshInstance3D
 	for filho in find_children("*", "MeshInstance3D", true, false):
 		malha = filho as MeshInstance3D
+		if malha.mesh == null:
+			continue
 		for i in malha.mesh.get_surface_count():
 			var material := malha.get_active_material(i)
 			if material == null or not material.resource_name.contains("OlhoRobo"):

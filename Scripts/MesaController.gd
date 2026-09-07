@@ -78,32 +78,6 @@ func revelar(faces: Dictionary) -> void:
 		tween.parallel().tween_property(modelo, "rotation", Vector3(0.0, 0.0, deg_to_rad(-20.0)), 0.35)
 
 
-## O jogador espia os próprios dados: o copo inclina e mostra as faces
-## ([faces] = DiceSystem.ver_dados). Com [ativo] falso, volta a esconder.
-func espiar(jogador_id: int, faces: Array, ativo: bool) -> void:
-	var copo := _copo(jogador_id)
-	if copo == null or not copo.visible:
-		return
-	var modelo: Node3D = copo.get_node("Modelo")
-	_parar(copo)
-	var tween := create_tween()
-	_tweens[copo.name] = tween
-	if ativo:
-		for i in 3:
-			var dado: Node3D = copo.get_node("Dado%d" % i)
-			dado.visible = i < faces.size()
-			if i < faces.size():
-				_virar_dado(dado, faces[i])
-		tween.tween_property(modelo, "position:y", ALTURA_COPO + 0.16, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(modelo, "rotation:x", deg_to_rad(-40.0), 0.3)
-	else:
-		tween.tween_property(modelo, "position:y", ALTURA_COPO, 0.25).set_ease(Tween.EASE_IN)
-		tween.parallel().tween_property(modelo, "rotation:x", 0.0, 0.25)
-		tween.tween_callback(func() -> void:
-			for i in 3:
-				copo.get_node("Dado%d" % i).visible = false)
-
-
 ## Jogador eliminado: copo e dados somem da mesa.
 func remover_copo(jogador_id: int) -> void:
 	var copo := _copo(jogador_id)

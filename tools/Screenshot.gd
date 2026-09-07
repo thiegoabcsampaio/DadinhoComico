@@ -3,8 +3,8 @@ extends Node
 ## um PNG da câmera fixa. Uso:
 ##   godot --path . tools/Screenshot.tscn -- <png> [modo] [frames]
 ## modo: "jogo" (padrão), "revelacao" (copos levantados com faces),
-## "castigos" (dispara o castigo dos 4 NPCs)
-## ou "espiar" (copo do jogador inclinado mostrando os dados).
+## "castigos" (dispara o castigo dos 4 NPCs), "vez" (painel de jogada
+## aberto) ou "zoom" (dados voando do copo ao placar; use ~14 frames).
 
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
@@ -47,10 +47,12 @@ func _ready() -> void:
 			main.mesa.revelar({ 0: [1, 2, 3], 1: [4, 5, 6], 2: [6, 6], 3: [1], 4: [2, 3, 5] })
 			for id in main._controladores:
 				main._castigar(id)
-		"espiar":
-			main.mesa.espiar(main.JOGADOR_HUMANO, [2, 5, 6], true)
+		"vez":
+			# Painel de jogada aberto, como na vez do jogador.
+			main.hud.habilitar_vez(true)
 		"falas":
 			# Painel de provocações aberto na vez do jogador.
+			main.hud.habilitar_vez(true)
 			main.hud._botao_falar.pressed.emit()
 		"narrador":
 			main.hud.mostrar_balao(HudController.NARRADOR, DialogueLoader.get_random("narrador", "resultado", { "face": 4, "contagem": 3, "veredicto": "VERDADEIRA", "perdedor": "Bruxa" }), 6.0)
@@ -68,8 +70,9 @@ func _ready() -> void:
 				await get_tree().create_timer(0.05).timeout
 			main.hud.registrar_evento("Face 4 apareceu 3 vezes: pedido VERDADEIRO.")
 		"zoom":
-			# Ver Dados pelo caminho real: HUD -> Main -> mesa + zoom na HUD.
-			main.hud._botao_ver_dados.button_pressed = true
+			# Dados voam do copo ao placar (antes era o botão Ver Dados).
+			main.hud.animar_dados_para_placar(
+				main.mesa.posicao_copo(0), main.jogo.ver_dados(0))
 		"feel":
 			# Mouse sobre Apostar e clique numa face: hover, som e faíscas.
 			main.hud._botao_apostar.mouse_entered.emit()

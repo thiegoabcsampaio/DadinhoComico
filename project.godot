@@ -15,6 +15,10 @@ run/main_scene="res://Scenes/Menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[autoload]
+
+Partida="*res://Scripts/Partida.gd"
+
 [display]
 
 window/stretch/mode="canvas_items"
@@ -28,7 +32,3 @@ window/stretch/aspect="expand"
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-
-[autoload]
-
-Partida="*res://Scripts/Partida.gd"

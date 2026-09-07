@@ -13,8 +13,6 @@ signal dudo_solicitado()
 signal acelerar_alternado(ativo: bool)
 ## Encerrar a partida atual / começar um novo jogo.
 signal encerrar_solicitado()
-## Botão Ver Dados ligado/desligado (o copo do jogador espia na mesa 3D).
-signal ver_dados_alternado(ativo: bool)
 ## O jogador escolheu uma provocação para dizer ao NPC [alvo].
 signal provocacao_escolhida(texto: String, alvo: int)
 ## Não há mais nenhuma fala na fila: a partida pode seguir.
@@ -49,10 +47,6 @@ const DURACAO_HOVER := 0.12
 @onready var _faces: HBoxContainer = %Faces
 @onready var _botao_apostar: Button = %BotaoApostar
 @onready var _botao_dudo: Button = %BotaoDudo
-@onready var _botao_ver_dados: Button = %BotaoVerDados
-@onready var _painel_dados: PanelContainer = %PainelDados
-@onready var _label_meus_dados: Label = %LabelMeusDados
-@onready var _label_titulo_dados: Label = %LabelTituloDados
 @onready var _label_titulo_qtd: Label = %LabelTituloQtd
 @onready var _label_titulo_face: Label = %LabelTituloFace
 @onready var _painel_acoes: PanelContainer = %PainelAcoes
@@ -86,8 +80,8 @@ var _botao_falar: Button
 var _painel_falas: PanelContainer
 ## jogador_id -> Color, para o nome no log. Main preenche antes de configurar.
 var cores_jogadores := {}
-## Os dados ficam parados no painel enquanto Ver Dados está ligado.
-var _dados_parados := false
+## Linha de dados do jogador no placar (sempre visível).
+var _label_dados: Label
 ## Falas esperando a vez: { "id": int, "texto": String, "duracao": float }.
 var _fila: Array[Dictionary] = []
 var _balao_atual: BalaoDialogo
@@ -102,12 +96,10 @@ func _t(chave: String) -> String:
 
 func _ready() -> void:
 	_label_info.text = _t("info_inicial")
-	_label_titulo_dados.text = _t("titulo_seus_dados")
 	_label_titulo_qtd.text = _t("titulo_quantidade")
 	_label_titulo_face.text = _t("titulo_face")
 	_botao_apostar.text = _t("botao_apostar")
 	_botao_dudo.text = _t("botao_dudo")
-	_botao_ver_dados.text = _t("botao_ver_dados")
 	_botao_acelerar.text = _t("botao_acelerar")
 	_botao_encerrar.text = _t("botao_encerrar")
 
@@ -122,15 +114,17 @@ func _ready() -> void:
 		botao.pressed.connect(_definir_face.bind(i + DiceSystem.FACE_MIN))
 	_botao_apostar.pressed.connect(func() -> void: aposta_solicitada.emit(_quantidade, _face))
 	_botao_dudo.pressed.connect(func() -> void: dudo_solicitado.emit())
-	_botao_ver_dados.toggled.connect(func(ativo: bool) -> void:
-		_painel_dados.visible = ativo
-		ver_dados_alternado.emit(ativo))
-	_painel_dados.visible = false
 	_label_status.text = ""
-	# Reserva o espaço da linha de dados: com o rótulo vazio o retângulo
-	# encolhia e os dados pousavam fora do painel.
-	_label_meus_dados.custom_minimum_size = Vector2(TAMANHO_DADO.x * 3.0 + 20.0, TAMANHO_DADO.y)
-	_label_meus_dados.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+	var pai_botoes := _botao_apostar.get_parent()
+	var linha := HBoxContainer.new()
+	linha.name = "LinhaAcoes"
+	linha.add_theme_constant_override("separation", 12)
+	_botao_apostar.reparent(linha)
+	_botao_dudo.reparent(linha)
+	pai_botoes.add_child(linha)
+	pai_botoes.move_child(linha, 0)
+
 	_criar_pedido()
 	_criar_placar()
 	_criar_camada_efeitos()
@@ -148,55 +142,75 @@ func _criar_placar() -> void:
 	placar.name = "Placar"
 	placar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var fundo := StyleBoxFlat.new()
-	fundo.bg_color = Color(0.09, 0.07, 0.06, 0.72)
-	fundo.border_color = Color(0.1, 0.1, 0.1, 0.9)
-	fundo.set_border_width_all(2)
-	fundo.set_corner_radius_all(14)
-	fundo.set_content_margin_all(10.0)
+	fundo.bg_color = Color(0.10, 0.04, 0.16, 0.92)
+	fundo.border_color = Color(0.92, 0.72, 0.18)
+	fundo.set_border_width_all(3)
+	fundo.border_width_top = 6
+	fundo.set_corner_radius_all(8)
+	fundo.set_content_margin_all(12.0)
+	fundo.shadow_color = Color(0.0, 0.0, 0.0, 0.5)
+	fundo.shadow_size = 8
 	placar.add_theme_stylebox_override("panel", fundo)
 	add_child(placar)
 	_placar = placar
 	placar.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	placar.offset_left = -(LARGURA_PLACAR + 32.0)
 	placar.offset_right = -12.0
-	# Fica exatamente na altura do painel de jogada, sem invadi-lo.
-	_painel_acoes.resized.connect(_alinhar_placar)
 	_alinhar_placar.call_deferred()
+	# O painel de jogada centraliza no espaço que sobra à esquerda do placar;
+	# sem isso o quadro cobria o botão Desconfio.
+	var rodape := _painel_acoes.get_parent().get_parent() as MarginContainer
+	if rodape != null:
+		rodape.add_theme_constant_override("margin_right", int(LARGURA_PLACAR + 32.0 + 12.0))
 
 	var coluna := VBoxContainer.new()
-	coluna.add_theme_constant_override("separation", 4)
+	coluna.add_theme_constant_override("separation", 6)
 	coluna.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	placar.add_child(coluna)
 
-	# Os dois rótulos já existem na HUD.tscn: mudam de casa, não de identidade.
-	# A largura fica travada: sem isso o texto empurra o quadro para a esquerda
-	# e ele acaba por cima do painel de jogada.
+	_label_info.get_parent().remove_child(_label_info)
+	coluna.add_child(_label_info)
+
+	_label_dados = Label.new()
+	_label_dados.name = "LabelDados"
+	_label_dados.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_label_dados.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_label_dados.add_theme_font_size_override("font_size", 20)
+	_label_dados.add_theme_color_override("font_color", Color(0.98, 0.98, 0.96))
+	_label_dados.add_theme_color_override("font_outline_color", Color(0.08, 0.06, 0.05))
+	_label_dados.add_theme_constant_override("outline_size", 4)
+	coluna.add_child(_label_dados)
+
+	var separador := ColorRect.new()
+	separador.color = Color(0.92, 0.72, 0.18, 0.45)
+	separador.custom_minimum_size = Vector2(0.0, 2.0)
+	separador.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	coluna.add_child(separador)
+
+	_label_mesa.get_parent().remove_child(_label_mesa)
+	coluna.add_child(_label_mesa)
+
 	for rotulo in [_label_info, _label_mesa]:
-		rotulo.get_parent().remove_child(rotulo)
-		coluna.add_child(rotulo)
 		rotulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		rotulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		rotulo.custom_minimum_size = Vector2(LARGURA_PLACAR, 0.0)
 		rotulo.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	_label_info.add_theme_font_size_override("font_size", 16)
-	_label_info.add_theme_color_override("font_color", Color(1.0, 0.92, 0.7))
-	_label_mesa.add_theme_font_size_override("font_size", 13)
-	_label_mesa.add_theme_color_override("font_color", Color(0.85, 0.83, 0.78))
+	_label_info.add_theme_font_size_override("font_size", 17)
+	_label_info.add_theme_color_override("font_color", Color(1.0, 0.88, 0.3))
+	_label_mesa.add_theme_font_size_override("font_size", 14)
+	_label_mesa.add_theme_color_override("font_color", Color(0.95, 0.92, 0.88))
 
 	var topo := get_node_or_null("Topo")
 	if topo != null:
 		topo.queue_free()
 
 
-## Topo e base do quadro acompanham o painel de jogada, que muda de altura
-## conforme o conteúdo. Os offsets são medidos a partir da borda de baixo.
 func _alinhar_placar() -> void:
-	if _placar == null or _painel_acoes == null:
+	if _placar == null:
 		return
-	var painel := _painel_acoes.get_global_rect()
-	var altura_tela := get_viewport().get_visible_rect().size.y
-	_placar.offset_top = painel.position.y - altura_tela
-	_placar.offset_bottom = painel.end.y - altura_tela
+	var altura := _placar.get_combined_minimum_size().y
+	_placar.offset_bottom = -12.0
+	_placar.offset_top = -12.0 - altura
 
 
 ## Logo abaixo de "Sua vez!": o que está na mesa e precisa ser superado.
@@ -214,8 +228,8 @@ func _criar_pedido() -> void:
 	_label_pedido.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_label_pedido.offset_left = -420.0
 	_label_pedido.offset_right = 420.0
-	_label_pedido.offset_top = -306.0
-	_label_pedido.offset_bottom = -272.0
+	_label_pedido.offset_top = -216.0
+	_label_pedido.offset_bottom = -182.0
 
 
 ## Atualiza o destaque do pedido a superar (vazio fora da vez do jogador).
@@ -245,7 +259,7 @@ func _criar_log() -> void:
 	_log.offset_left = 12.0
 	_log.offset_top = 148.0
 	_log.offset_right = 292.0
-	_log.offset_bottom = -276.0
+	_log.offset_bottom = -186.0
 
 	_botao_log = Button.new()
 	_botao_log.name = "BotaoLog"
@@ -302,7 +316,7 @@ func _criar_falas() -> void:
 	_botao_falar = Button.new()
 	_botao_falar.name = "BotaoFalar"
 	_botao_falar.text = _t("botao_falar")
-	_botao_apostar.get_parent().add_child(_botao_falar)
+	_botao_apostar.get_parent().get_parent().add_child(_botao_falar)
 	_botao_falar.pressed.connect(_alternar_falas)
 
 	_painel_falas = PanelContainer.new()
@@ -319,8 +333,8 @@ func _criar_falas() -> void:
 	_painel_falas.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_painel_falas.offset_left = -330.0
 	_painel_falas.offset_right = 330.0
-	_painel_falas.offset_top = -420.0
-	_painel_falas.offset_bottom = -230.0
+	_painel_falas.offset_top = -342.0
+	_painel_falas.offset_bottom = -152.0
 
 
 ## Preenche o painel com as opções do personagem do jogador. [alvo] é o NPC
@@ -389,7 +403,7 @@ func _preparar_game_feel() -> void:
 func _botoes() -> Array[Button]:
 	var lista: Array[Button] = [
 		_botao_menos, _botao_mais, _botao_apostar, _botao_dudo,
-		_botao_ver_dados, _botao_acelerar, _botao_encerrar,
+		_botao_acelerar, _botao_encerrar,
 	]
 	if _botao_falar != null:
 		lista.append(_botao_falar)
@@ -443,49 +457,50 @@ func _faiscas(posicao: Vector2) -> void:
 	get_tree().create_timer(particulas.lifetime + 0.2).timeout.connect(particulas.queue_free)
 
 
-# --------------------------------------------------- Zoom dos dados (Ver Dados)
+# ------------------------------------------------- Dados no placar
 
-## Leva os dados do jogador do copo na mesa até o painel "Seus dados"
-## ([entrando] verdadeiro) ou de volta ao copo. [origem] é a posição do copo
-## no mundo; [faces] são as faces reais, as mesmas que o copo 3D mostra.
-func animar_dados(origem: Vector3, faces: Array, entrando: bool) -> void:
+## Dados voam do copo na mesa até a linha do placar a cada rodada.
+func animar_dados_para_placar(origem: Vector3, faces: Array) -> void:
 	_limpar_dados_voando()
-	if _camera == null or faces.is_empty() or origem == Vector3.ZERO:
+	if _camera == null or faces.is_empty() or _label_dados == null:
 		return
 	if _camera.is_position_behind(origem):
 		return
-	# O painel acabou de ficar visível; sem esperar um quadro, o retângulo
-	# dele ainda é o antigo e os dados pousavam em lugares diferentes.
-	_dados_parados = entrando
-	_atualizar_meus_dados()
+	# Só a transparência: esconder a label tirava a linha do VBox e o
+	# destino era medido com o placar colapsado.
+	_label_dados.modulate.a = 0.0
 	await get_tree().process_frame
-	if _dados_parados != entrando:
-		return
 
 	var na_mesa := _camera.unproject_position(origem) - TAMANHO_DADO * 0.5
-	var centro_painel := _label_meus_dados.get_global_rect().get_center()
+	var linha := _label_dados.get_global_rect()
+	var escala := linha.size.y / TAMANHO_DADO.y
+	var passo := TAMANHO_DADO.x * escala + 6.0
+	var inicio := linha.position.x + TAMANHO_DADO.x * escala * 0.5 + 4.0
 	for i in faces.size():
 		var icone := _criar_icone_dado(int(faces[i]))
 		_camada_efeitos.add_child(icone)
 		_dados_voando.append(icone)
 
-		var lado := (float(i) - (faces.size() - 1) * 0.5) * (TAMANHO_DADO.x + 6.0)
-		var no_painel := centro_painel + Vector2(lado, 0.0) - TAMANHO_DADO * 0.5
-		icone.position = na_mesa if entrando else no_painel
-		icone.scale = Vector2.ONE * (0.3 if entrando else 1.0)
+		var centro := Vector2(inicio + i * passo, linha.get_center().y)
+		var no_placar := centro - TAMANHO_DADO * 0.5
+		icone.position = na_mesa
+		icone.scale = Vector2.ONE * 0.3
 		icone.modulate.a = 0.0
 
 		var tween := create_tween()
 		tween.tween_interval(i * 0.07)
 		tween.tween_property(icone, "modulate:a", 1.0, 0.12)
-		tween.parallel().tween_property(icone, "position", no_painel if entrando else na_mesa, DURACAO_ZOOM) \
+		tween.parallel().tween_property(icone, "position", no_placar, DURACAO_ZOOM) \
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(icone, "scale", Vector2.ONE * (1.0 if entrando else 0.3), DURACAO_ZOOM)
-		# Indo para o painel os dados FICAM lá, no lugar dos números.
-		# Voltando para o copo, somem ao chegar.
-		if not entrando:
-			tween.tween_property(icone, "modulate:a", 0.0, 0.18)
-			tween.tween_callback(icone.queue_free)
+		tween.parallel().tween_property(icone, "scale", Vector2.ONE * escala, DURACAO_ZOOM)
+		tween.tween_property(icone, "modulate:a", 0.0, 0.18)
+		tween.tween_callback(icone.queue_free)
+
+	var total := (faces.size() - 1) * 0.07 + 0.12 + DURACAO_ZOOM
+	var revelar := create_tween()
+	revelar.tween_interval(total)
+	revelar.tween_property(_label_dados, "modulate:a", 1.0, 0.18)
+	revelar.tween_callback(_limpar_dados_voando)
 
 
 func _limpar_dados_voando() -> void:
@@ -576,12 +591,12 @@ func configurar(jogo: GameManager, humano: int, camera: Camera3D, ancoras: Dicti
 ## Liga/desliga os controles de jogada do humano.
 func habilitar_vez(ativa: bool) -> void:
 	_vez_ativa = ativa
+	_painel_acoes.visible = ativa
 	_botao_menos.disabled = not ativa
 	_botao_mais.disabled = not ativa
 	for botao in _faces.get_children():
 		botao.disabled = not ativa
 	_botao_dudo.disabled = not ativa or _jogo == null or _jogo.aposta_atual == null
-	# Provocar é opcional e só na própria vez; não gasta a jogada.
 	if _botao_falar != null:
 		_botao_falar.disabled = not ativa
 	if not ativa and _painel_falas != null:
@@ -704,34 +719,26 @@ func _atualizar_info() -> void:
 		aposta_txt = DialogueLoader.get_fmt("ui", "info_aposta", [_jogo.aposta_atual, _jogo.nome(_jogo.aposta_atual.jogador)])
 	_label_info.text = DialogueLoader.get_fmt("ui", "info_rodada", [_jogo.numero_rodada, aposta_txt])
 
+	if _label_dados != null:
+		var dados := _jogo.ver_dados(_humano)
+		if dados.is_empty():
+			_label_dados.text = ""
+		else:
+			var nomes := PackedStringArray()
+			for d in dados:
+				nomes.append(str(d))
+			_label_dados.text = "🎲 " + " · ".join(nomes)
+
 	var partes := PackedStringArray()
 	for id in _jogo.turnos.ativos():
 		partes.append(DialogueLoader.get_fmt("ui", "dados_jogador", [_jogo.nome(id), _jogo.dados.quantidade_dados(id)]))
-	_label_mesa.text = "   ·   ".join(partes)
+	_label_mesa.text = "\n".join(partes)
 	_atualizar_pedido()
-
-
-## Enquanto os dados estão parados no painel, o número seria repetição.
-func _atualizar_meus_dados() -> void:
-	if _jogo == null:
-		return
-	if _dados_parados:
-		_label_meus_dados.text = ""
-		return
-	var faces := PackedStringArray()
-	for dado in _jogo.ver_dados(_humano):
-		faces.append(str(dado))
-	_label_meus_dados.text = "  ".join(faces)
-
-
-## Ver Dados ligado? Main usa para repor os dados no painel a cada rodada.
-func espiando() -> bool:
-	return _botao_ver_dados.button_pressed
+	_alinhar_placar()
 
 
 func _ao_iniciar_rodada(numero: int) -> void:
 	_atualizar_info()
-	_atualizar_meus_dados()
 	registrar_evento(DialogueLoader.get_fmt("ui", "log_rodada", [numero]))
 
 
@@ -765,7 +772,6 @@ func _ao_resolver_dudo(r: BetValidator.ResultadoDudo) -> void:
 		"perdedor": _jogo.nome(r.perdedor),
 	}), DURACAO_BALAO + 0.8)
 	_atualizar_info()
-	_atualizar_meus_dados()
 
 
 func _ao_eliminar(jogador_id: int) -> void:
@@ -776,13 +782,11 @@ func _ao_eliminar(jogador_id: int) -> void:
 		_entrar_modo_espectador()
 
 
-## Some com os dados parados no painel. Sem isto eles ficavam flutuando na
-## tela depois que o painel de jogada saía (fim de partida ou eliminação).
 func _esconder_dados() -> void:
-	_botao_ver_dados.set_pressed_no_signal(false)
-	_painel_dados.visible = false
-	_dados_parados = false
 	_limpar_dados_voando()
+	if _label_dados != null:
+		_label_dados.text = ""
+		_label_dados.modulate.a = 1.0
 
 
 ## Humano fora: some o painel de jogada, aparecem Acelerar / Encerrar.

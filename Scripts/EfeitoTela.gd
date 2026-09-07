@@ -108,11 +108,13 @@ func _gosma() -> void:
 	_tween_castigo.tween_property(_cor, "color:a", 0.55, 0.3)
 	if _ambiente != null:
 		_tween_castigo.parallel().tween_property(_ambiente, "adjustment_saturation", 1.8, 0.3)
-	# Ondula: o retângulo sobe e desce enquanto a cor está no ar.
 	for i in 4:
-		_tween_castigo.tween_property(_cor, "offset:y", 26.0, 0.28).set_trans(Tween.TRANS_SINE)
-		_tween_castigo.tween_property(_cor, "offset:y", -26.0, 0.28).set_trans(Tween.TRANS_SINE)
-	_tween_castigo.tween_property(_cor, "offset:y", 0.0, 0.2)
+		_tween_castigo.tween_property(_cor, "offset_top", 26.0, 0.28).set_trans(Tween.TRANS_SINE)
+		_tween_castigo.parallel().tween_property(_cor, "offset_bottom", 26.0, 0.28).set_trans(Tween.TRANS_SINE)
+		_tween_castigo.tween_property(_cor, "offset_top", -26.0, 0.28).set_trans(Tween.TRANS_SINE)
+		_tween_castigo.parallel().tween_property(_cor, "offset_bottom", -26.0, 0.28).set_trans(Tween.TRANS_SINE)
+	_tween_castigo.tween_property(_cor, "offset_top", 0.0, 0.2)
+	_tween_castigo.parallel().tween_property(_cor, "offset_bottom", 0.0, 0.2)
 	_tween_castigo.parallel().tween_property(_cor, "color:a", 0.0, 0.6)
 	if _ambiente != null:
 		_tween_castigo.parallel().tween_property(_ambiente, "adjustment_saturation", 1.0, 0.6)
@@ -153,6 +155,48 @@ func _tremer(duracao: float, forca: float) -> void:
 		tween.tween_property(_camera, "position", _pos_camera + desvio, 0.05)
 	tween.tween_property(_camera, "position", _pos_camera, 0.05)
 
+
+# ----------------------------------------------------------------- Vitória
+
+## Confete colorido caindo pela tela inteira, estilo programa de auditório.
+func vitoria() -> void:
+	var cores: Array[Color] = [
+		Color(1.0, 0.25, 0.25),
+		Color(0.3, 0.55, 1.0),
+		Color(1.0, 0.85, 0.15),
+		Color(0.2, 0.85, 0.35),
+		Color(1.0, 0.4, 0.7),
+	]
+	var viewport_size := get_viewport().get_visible_rect().size
+	var tex := _textura_confete()
+	for cor in cores:
+		var confete := CPUParticles2D.new()
+		add_child(confete)
+		confete.position = Vector2(viewport_size.x / 2.0, -10.0)
+		confete.amount = 22
+		confete.lifetime = 3.5
+		confete.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+		confete.emission_rect_extents = Vector2(viewport_size.x / 2.0, 0.0)
+		confete.direction = Vector2(0.0, 1.0)
+		confete.spread = 15.0
+		confete.initial_velocity_min = 80.0
+		confete.initial_velocity_max = 220.0
+		confete.gravity = Vector2(0.0, 100.0)
+		confete.angular_velocity_min = -400.0
+		confete.angular_velocity_max = 400.0
+		confete.scale_amount_min = 2.5
+		confete.scale_amount_max = 5.0
+		confete.color = cor
+		confete.texture = tex
+
+
+func _textura_confete() -> ImageTexture:
+	var img := Image.create(4, 7, false, Image.FORMAT_RGBA8)
+	img.fill(Color.WHITE)
+	return ImageTexture.create_from_image(img)
+
+
+# ---------------------------------------------------------------- Restaurar
 
 func _restaurar() -> void:
 	_cor.color.a = 0.0

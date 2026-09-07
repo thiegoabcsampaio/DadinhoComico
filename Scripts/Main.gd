@@ -25,6 +25,7 @@ const JOGADOR_HUMANO := 0
 @onready var assentos: Node3D = $Assentos
 @onready var mesa: MesaController = $Mesa
 @onready var castigos: PunishmentSystem = $Castigos
+@onready var celebracoes: CelebrationSystem = $Celebracoes
 @onready var efeitos: EfeitoTela = $Efeitos
 @onready var plateia: PlateiaController = $Plateia
 @onready var ambiente: WorldEnvironment = $WorldEnvironment
@@ -88,7 +89,6 @@ func _ready() -> void:
 	hud.dudo_solicitado.connect(_ao_humano_dudo)
 	hud.acelerar_alternado.connect(_ao_alternar_aceleracao)
 	hud.encerrar_solicitado.connect(_reiniciar_partida)
-	hud.ver_dados_alternado.connect(_ao_espiar)
 	hud.provocacao_escolhida.connect(_ao_provocar)
 	jogo.aposta_feita.connect(_ao_apostar)
 	jogo.dudo_declarado.connect(_ao_declarar_dudo)
@@ -187,9 +187,7 @@ func _iniciar_rodada() -> void:
 	jogo.iniciar_rodada()
 	mesa.agitar()
 	Sfx.tocar("Dado_Agitar")
-	# Dados novos: se o jogador estava espiando, mostra os de agora.
-	if hud.espiando():
-		_ao_espiar(true)
+	hud.animar_dados_para_placar(mesa.posicao_copo(JOGADOR_HUMANO), jogo.ver_dados(JOGADOR_HUMANO))
 	_processar_turno()
 
 
@@ -284,17 +282,6 @@ func _ao_humano_apostar(quantidade: int, face: int) -> void:
 		_processar_turno()
 
 
-## Ver Dados: o copo do jogador inclina e mostra os próprios dados.
-## Fora da fase de apostas (revelação em curso) só é permitido esconder.
-func _ao_espiar(ativo: bool) -> void:
-	if ativo and not jogo.estado.esta_em(StateManager.Estado.APOSTANDO):
-		return
-	var faces := jogo.ver_dados(JOGADOR_HUMANO)
-	mesa.espiar(JOGADOR_HUMANO, faces, ativo)
-	# Os dados "voam" do copo para o painel (e voltam ao esconder).
-	hud.animar_dados(mesa.posicao_copo(JOGADOR_HUMANO), faces, ativo)
-
-
 func _ao_humano_dudo() -> void:
 	# A resolução dispara dudo_resolvido -> _ao_resolver_dudo.
 	if _controladores.has(JOGADOR_HUMANO):
@@ -329,9 +316,12 @@ func _ao_resolver_dudo(resultado: BetValidator.ResultadoDudo) -> void:
 func _reagir_e_agendar(resultado: BetValidator.ResultadoDudo) -> void:
 	await get_tree().create_timer(atraso_reacao).timeout
 	var eliminado := jogo.dados.quantidade_dados(resultado.perdedor) == 0
-	_falar(resultado.perdedor, "castigos" if eliminado else "reacoes")
-	if eliminado:
-		_castigar(resultado.perdedor)
+	if eliminado and jogo.jogo_acabou():
+		_falar(resultado.perdedor, "derrota")
+	else:
+		_falar(resultado.perdedor, "castigos" if eliminado else "reacoes")
+		if eliminado:
+			_castigar(resultado.perdedor)
 	await get_tree().create_timer(maxf(0.0, atraso_entre_rodadas - atraso_reacao)).timeout
 	# A rodada nova só começa quando a mesa terminou de comentar a anterior.
 	await _esperar_baloes()
@@ -355,7 +345,16 @@ func _castigar(jogador_id: int) -> void:
 func _ao_terminar(vencedor: int) -> void:
 	Engine.time_scale = 1.0
 	Sfx.tocar("Vitoria")
-	# Sem os copos na frente, a comemoração do vencedor fica limpa.
 	mesa.recolher_copos()
+	efeitos.vitoria()
 	if _controladores.has(vencedor):
 		_controladores[vencedor].tocar("Comemorar")
+		var chave := _chave(vencedor)
+		if chave == "ciborgue":
+			_controladores[vencedor].acender_olho(8.0)
+		celebracoes.celebrar(chave, _controladores[vencedor])
+	var fala := DialogueLoader.get_random(_chave(vencedor), "vitoria")
+	if fala != "":
+		hud.mostrar_balao(vencedor, fala)
+		if _controladores.has(vencedor):
+			_controladores[vencedor].olhar_para(camera, HudController.DURACAO_BALAO)

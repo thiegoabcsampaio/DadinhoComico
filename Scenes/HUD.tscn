@@ -207,9 +207,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -420.0
-offset_top = -352.0
+offset_top = -262.0
 offset_right = 420.0
-offset_bottom = -308.0
+offset_bottom = -218.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
@@ -224,7 +224,7 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -200.0
+offset_top = -160.0
 grow_horizontal = 2
 grow_vertical = 0
 theme = SubResource("tema_hq")
@@ -243,27 +243,6 @@ layout_mode = 2
 [node name="HBox" type="HBoxContainer" parent="Rodape/Centro/PainelAcoes"]
 layout_mode = 2
 theme_override_constants/separation = 24
-
-[node name="PainelDados" type="PanelContainer" parent="Rodape/Centro/PainelAcoes/HBox"]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="VBoxDados" type="VBoxContainer" parent="Rodape/Centro/PainelAcoes/HBox/PainelDados"]
-layout_mode = 2
-alignment = 1
-
-[node name="LabelTituloDados" type="Label" parent="Rodape/Centro/PainelAcoes/HBox/PainelDados/VBoxDados"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-horizontal_alignment = 1
-
-[node name="LabelMeusDados" type="Label" parent="Rodape/Centro/PainelAcoes/HBox/PainelDados/VBoxDados"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "-"
-horizontal_alignment = 1
 
 [node name="Seletor" type="VBoxContainer" parent="Rodape/Centro/PainelAcoes/HBox"]
 layout_mode = 2
@@ -367,11 +346,6 @@ theme_override_styles/hover = SubResource("dudo_hover")
 theme_override_styles/hover_pressed = SubResource("dudo_pressed")
 theme_override_styles/normal = SubResource("dudo_normal")
 theme_override_styles/pressed = SubResource("dudo_pressed")
-
-[node name="BotaoVerDados" type="Button" parent="Rodape/Centro/PainelAcoes/HBox/Botoes"]
-unique_name_in_owner = true
-layout_mode = 2
-toggle_mode = true
 
 [node name="PainelEspectador" type="PanelContainer" parent="Rodape/Centro"]
 unique_name_in_owner = true

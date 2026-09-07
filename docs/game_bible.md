@@ -123,7 +123,50 @@ Cole este bloco no inicio da proxima sessao.
 - Log de historico a esquerda, estilo app de mensagens, com falas, apostas, Desconfio, revelacoes
   e castigos; existe so durante a partida e reinicia no Novo jogo
 - Resultado da revelacao aparece tambem num balao do "narrador", no centro da mesa
-- Ver Dados: os dados voam do copo para o painel e FICAM la (nao viram numeros)
+
+## Rodada 4 (leitura, linguagem, vitoria e plateia)
+
+Linguagem: o jogo nao remete a apostas. Texto visivel usa Pedir / pedido /
+"perde um dado"; identificadores de codigo (Aposta, aposta_feita, BetValidator)
+nao mudaram. O castigo e anunciado como "Hora da/do <palavra>" (ui.hora_castigo).
+
+HUD:
+- Um balao por vez, em fila (HudController.mostrar_balao enfileira; Main espera
+  `fila_vazia` antes da jogada seguinte). O balao do jogador fica junto do painel.
+- Painel de jogada compacto, so na vez do jogador (habilitar_vez liga a
+  visibilidade): Quantidade / Face a esquerda, Pedir + Desconfio lado a lado e
+  Falar embaixo. Fora da vez ele some, para nao tapar o personagem da esquerda.
+  O Rodape reserva a largura do placar a direita (margin_right), senao o quadro
+  cobria o Desconfio.
+- Nao existe mais "Ver Dados": os dados do jogador ficam sempre no placar. A cada
+  rodada os icones voam do copo ate a linha de dados (animar_dados_para_placar)
+  e a label aparece quando eles chegam. O copo do jogador nao inclina mais.
+- Placar (canto inferior direito, estilo painel de auditorio: roxo, borda dourada):
+  rodada, pedido atual, dados do jogador, dados de cada um (um nome por linha).
+  Ancorado com offset fixo, independente do painel de jogada.
+- "Precisa superar: <pedido>" em amarelo logo abaixo de "Sua vez!".
+
+Iluminacao: OmniLight3D sem sombra sobre a mesa (LuzMesa, y=2, energia 0,5) para
+preencher as sombras sob copos e personagens - sem ela os copos pareciam flutuar.
+
+IA: nivel 1 a 5 sorteado por NPC a cada partida (NpcAI.nivel), aplicado como
+erro na probabilidade que o NPC enxerga, nao nas regras. O nivel de cada um sai
+no log ao comecar. Heroi e Ciborgue blefam bem mais que antes.
+
+Fim de partida (CelebrationSystem, espelho do PunishmentSystem): confete na tela
+(EfeitoTela.vitoria) + numero do vencedor. Bruxa monta na vassoura e sai voando
+com rastro verde; Ciborgue inclina para a camera com olho vermelho pulsando;
+Apresentadora sobe no feixe dourado da nave; Heroi pula e dispara onda de choque.
+Na derrota do jogador, o NPC vencedor faz o numero dele. Quando a eliminacao
+encerra a partida, o castigo do eliminado NAO roda (a celebracao tem prioridade).
+
+Menu: cartoes com retrato (Assets/UI/Retratos, 256x256, render Workbench com
+fundo transparente), nome e frase; escolha do modo (Dadinho / Dados mentirosos,
+com as curinga).
+
+Plateia: adereços de mao (plaquinha, placa do robo, placa do OVNI, martelo, frufru)
+e de cabeca (oculos, bone, chapeu de bruxa, cabeca de robo), sorteados
+independentemente por espectador; alguns espectadores robo.
 
 ## Plateia (Etapa 7)
 

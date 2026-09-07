@@ -79,7 +79,8 @@ DadinhoComico/
 │   ├── PlateiaController.gd (monta e anima a plateia; diversidade por codigo)
 │   ├── OlharModifier.gd     (gira so o osso da cabeca na direcao de um alvo)
 │   ├── HudController.gd
-│   ├── PunishmentSystem.gd
+│   ├── PunishmentSystem.gd  (castigo de cada personagem: modelo + adereco + som)
+│   ├── CelebrationSystem.gd (numero de vitoria de cada personagem; espelho do castigo)
 │   └── CameraSetup.gd
 ├── Resources/
 │   ├── NPCProfiles/
@@ -120,8 +121,11 @@ DadinhoComico/
 - Autoload "Partida" (Scripts/Partida.gd): unico estado que atravessa cenas; Menu grava, Main le
 - Assentos em Main.tscn: Assento0 = fundo (sempre o personagem do jogador), 1 esquerda, 2 direita,
   3 frente-esquerda; os NPCs sao sorteados entre 1..3 e herdam a rotacao do assento
-- Scripts/EfeitoTela.gd (CanvasLayer no Main): efeitos de tela do castigo do jogador e o
-  foco (escurecer + zoom) durante as falas
+- Scripts/EfeitoTela.gd (CanvasLayer no Main): efeitos de tela do castigo do jogador, o
+  foco (escurecer + zoom) durante as falas e o confete da vitoria
+- HUD: o placar (canto inferior direito) e a linha de dados do jogador sao criados por
+  codigo em HudController._criar_placar; o painel de jogada (HUD.tscn) so aparece na vez
+  do jogador. Nao existe mais botao Ver Dados nem MesaController.espiar
 - Scripts/LogHistorico.gd: painel do historico da partida, aberto pelo icone no canto
   superior esquerdo; vive so durante a partida
 - Espectador.glb: materiais Esp_Pele/Esp_Roupa/Esp_Cabelo para recolorir por instancia;
