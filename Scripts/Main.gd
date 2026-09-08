@@ -336,7 +336,14 @@ func _castigar(jogador_id: int) -> void:
 		return
 	var controlador: NpcController = _controladores[jogador_id]
 	controlador.tocar("Castigo")
-	castigos.castigar(_chave(jogador_id), controlador)
+	# Última fala no auge do castigo (o "Eu voltarei!" do Ciborgue), também
+	# quando o castigado é o jogador: o balão dele existe na HUD.
+	var grito := func() -> void:
+		var texto := DialogueLoader.get_random(_chave(jogador_id), "voltarei")
+		if texto != "":
+			hud.mostrar_balao(jogador_id, texto)
+			_encarar(jogador_id)
+	castigos.castigar(_chave(jogador_id), controlador, grito)
 	# Se o castigado é o personagem do jogador, a tela sente junto.
 	if jogador_id == JOGADOR_HUMANO:
 		efeitos.castigo(_chave(jogador_id))
@@ -349,6 +356,8 @@ func _ao_terminar(vencedor: int) -> void:
 	efeitos.vitoria()
 	if _controladores.has(vencedor):
 		_controladores[vencedor].tocar("Comemorar")
+		# Braços para o alto, balançando, enquanto o número dele acontece.
+		_controladores[vencedor].festejar()
 		var chave := _chave(vencedor)
 		if chave == "ciborgue":
 			_controladores[vencedor].acender_olho(8.0)

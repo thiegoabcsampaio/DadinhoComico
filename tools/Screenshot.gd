@@ -35,7 +35,7 @@ func _ready() -> void:
 	var main: Node3D = load("res://Scenes/Main.tscn").instantiate()
 	# Semente fixa nos modos de comparação, para o sorteio de assentos não
 	# mudar entre uma captura e outra.
-	if modo.begins_with("rosto") or modo == "ver":
+	if modo.begins_with("rosto") or modo == "ver" or modo.begins_with("vitoria"):
 		main.semente = 7777
 	add_child(main)
 	for i in 10:
@@ -59,6 +59,20 @@ func _ready() -> void:
 		"efeito":
 			# Castigo do personagem do jogador: modelo + efeito de tela.
 			main._castigar(main.JOGADOR_HUMANO)
+		"vitoria", "vitoria_perto":
+			# Fim de partida com o vencedor no assento do 4º argumento (padrão 1).
+			# "_perto": câmera entre a mesa e o vencedor, para ver os braços.
+			var vencedor := int(args[3]) if args.size() > 3 else 1
+			for id in main._controladores:
+				print("Assento%d = %s" % [id, main._controladores[id].name])
+			main._ao_terminar(vencedor)
+			if modo == "vitoria_perto" and main._controladores.has(vencedor):
+				var alvo: Node3D = main._controladores[vencedor]
+				var para_centro := (Vector3.ZERO - alvo.global_position)
+				para_centro.y = 0.0
+				var pos := alvo.global_position + para_centro.normalized() * 1.7 + Vector3(0.0, 1.3, 0.0)
+				main.camera.look_at_from_position(pos, alvo.global_position + Vector3(0.0, 1.0, 0.0), Vector3.UP)
+				main.hud.visible = false
 		"log":
 			main.hud._botao_log.button_pressed = true
 			# Enche o log com uma sequência de falas e eventos.

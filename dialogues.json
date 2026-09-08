@@ -195,6 +195,10 @@ Pedido: %s",
 		"apresentacao": [
 			"Modelo de mesa T-800. Objetivo: vencer. Sentimentos: não instalados."
 		],
+		"voltarei": [
+			"EU VOLTAREI!",
+			"Eu voltarei... e com atualização de firmware!"
+		],
 		"provocacoes": [
 			"{nome}, sua probabilidade de mentira: 97 por cento.",
 			"Detectei elevacao de pulso em {nome}. Blefe iminente.",

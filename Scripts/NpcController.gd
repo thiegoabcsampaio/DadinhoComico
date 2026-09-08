@@ -24,6 +24,9 @@ var _rng := RandomNumberGenerator.new()
 ## Modificador que gira só o osso da cabeça, por cima da animação.
 var _olhar: OlharModifier
 var _tween_olhar: Tween
+## Braços para o alto e balanço da vitória (criado no primeiro festejar).
+var _festa: FestaModifier
+var _tween_festa: Tween
 
 @onready var _player: AnimationPlayer = find_child("AnimationPlayer", true, false)
 
@@ -69,6 +72,24 @@ func olhar_para(alvo: Node3D, duracao: float) -> void:
 	_tween_olhar.tween_property(_olhar, "influence", 1.0, TRANSICAO_OLHAR)
 	_tween_olhar.tween_interval(maxf(0.0, duracao - TRANSICAO_OLHAR * 2.0))
 	_tween_olhar.tween_property(_olhar, "influence", 0.0, TRANSICAO_OLHAR)
+
+
+## Fim de partida: braços para o alto, balançando, até a cena recarregar.
+## Entra em [duracao] segundos; [ativo] falso desliga na mesma transição.
+func festejar(ativo: bool = true, duracao: float = 0.45) -> void:
+	if _festa == null:
+		var esqueleto := find_child("Skeleton3D", true, false) as Skeleton3D
+		if esqueleto == null:
+			return
+		_festa = FestaModifier.new()
+		_festa.name = "Festa"
+		_festa.influence = 0.0
+		esqueleto.add_child(_festa)
+	if _tween_festa != null and _tween_festa.is_valid():
+		_tween_festa.kill()
+	_tween_festa = create_tween()
+	_tween_festa.tween_property(_festa, "influence", 1.0 if ativo else 0.0, duracao) \
+		.set_trans(Tween.TRANS_SINE)
 
 
 ## Toca uma animação pontual; ao terminar volta ao Idle.
@@ -125,6 +146,10 @@ func congelar() -> void:
 		_tween_olhar.kill()
 	if _olhar != null:
 		_olhar.influence = 0.0
+	if _tween_festa != null and _tween_festa.is_valid():
+		_tween_festa.kill()
+	if _festa != null:
+		_festa.influence = 0.0
 	if _player != null:
 		_player.stop()
 

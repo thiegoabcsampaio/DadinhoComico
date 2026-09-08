@@ -78,6 +78,7 @@ DadinhoComico/
 │   ├── Sfx.gd               (Sfx.tocar("nome") -> Assets/Audio/SFX/nome.wav)
 │   ├── PlateiaController.gd (monta e anima a plateia; diversidade por codigo)
 │   ├── OlharModifier.gd     (gira so o osso da cabeca na direcao de um alvo)
+│   ├── FestaModifier.gd     (bracos para o alto e balanco do vencedor, por cima da animacao)
 │   ├── HudController.gd
 │   ├── PunishmentSystem.gd  (castigo de cada personagem: modelo + adereco + som)
 │   ├── CelebrationSystem.gd (numero de vitoria de cada personagem; espelho do castigo)

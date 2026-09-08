@@ -14,9 +14,11 @@ const COR_GOSMA := Color(0.35, 0.9, 0.2)
 
 ## [chave]: seção do personagem em dialogues.json.
 ## [alvo]: nó do personagem na mesa (NPC ou o modelo do jogador).
+## [ao_gritar]: chamado no auge do castigo, quando o personagem tem uma
+## última fala (hoje só o Ciborgue: "Eu voltarei!"). Main põe o balão.
 ## Regra do projeto: todo personagem tem um castigo aqui e um efeito de
 ## tela correspondente (rodada 3, item B1), sentido pelo jogador.
-func castigar(chave: String, alvo: Node3D) -> void:
+func castigar(chave: String, alvo: Node3D, ao_gritar: Callable = Callable()) -> void:
 	if alvo == null:
 		return
 	match chave:
@@ -27,7 +29,7 @@ func castigar(chave: String, alvo: Node3D) -> void:
 		"heroi":
 			_pilula_encolhedora(alvo)
 		"ciborgue":
-			_curto_circuito(alvo)
+			_curto_circuito(alvo, ao_gritar)
 		_:
 			push_warning("PunishmentSystem: sem castigo para '%s'" % chave)
 
@@ -132,8 +134,10 @@ func _pilula_encolhedora(alvo: Node3D) -> void:
 
 
 # --------------------------------------------------------------------- Ciborgue
-## Curto-circuito: faíscas, pisca-pisca vermelho e desliga tombando.
-func _curto_circuito(alvo: Node3D) -> void:
+## Curto-circuito em três atos: faíscas e pisca-pisca; a raiva (cresce,
+## avança, luz vermelha fixa, treme); grita "Eu voltarei!" e derrete no
+## fogo até virar uma poça, que evapora.
+func _curto_circuito(alvo: Node3D, ao_gritar: Callable) -> void:
 	Sfx.tocar("Castigo_Choque")
 	var faiscas := CPUParticles3D.new()
 	faiscas.amount = 60
@@ -156,22 +160,89 @@ func _curto_circuito(alvo: Node3D) -> void:
 	luz.position = Vector3(0.0, 1.1, 0.3)
 	alvo.add_child(luz)
 
+	var pos_base := alvo.position
+	var rot_base := alvo.rotation
 	var tween := create_tween()
+	# Ato 1: curto-circuito.
 	for i in 7:
 		tween.tween_property(luz, "light_energy", 4.0, 0.06)
 		tween.tween_property(luz, "light_energy", 0.0, 0.1)
-		tween.parallel().tween_property(alvo, "position:x", randf_range(-0.04, 0.04), 0.1)
-	tween.tween_property(alvo, "position:x", 0.0, 0.05)
+		tween.parallel().tween_property(alvo, "position:x", pos_base.x + randf_range(-0.04, 0.04), 0.1)
 	tween.tween_callback(func() -> void: faiscas.emitting = false)
-	tween.tween_callback(func() -> void: _fumaca(alvo, Vector3(0.0, 1.2, 0.0), Color(0.3, 0.3, 0.3)))
-	# Desliga e tomba para trás, devagar, como um robô sem energia.
-	tween.tween_property(alvo, "rotation:x", deg_to_rad(-75.0), 0.9).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
-	tween.tween_interval(0.6)
-	tween.tween_property(alvo, "scale", Vector3.ONE * 0.01, 0.3).set_ease(Tween.EASE_IN)
+	# Ato 2: raiva. Cresce, avança sobre a mesa, luz vermelha fixa e treme.
+	tween.tween_property(luz, "light_energy", 5.0, 0.25)
+	tween.parallel().tween_property(alvo, "scale", Vector3.ONE * 1.18, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(alvo, "rotation:x", rot_base.x + deg_to_rad(12.0), 0.35).set_trans(Tween.TRANS_SINE)
+	for i in 10:
+		tween.tween_property(alvo, "position:x", pos_base.x + randf_range(-0.05, 0.05), 0.07)
+		tween.parallel().tween_property(alvo, "position:z", pos_base.z + randf_range(-0.03, 0.03), 0.07)
+	tween.tween_property(alvo, "position", pos_base, 0.05)
+	# Ato 3: o grito e o fogo.
+	if ao_gritar.is_valid():
+		tween.tween_callback(ao_gritar)
+	var fogo := _chamas()
+	alvo.add_child(fogo)
+	fogo.position = Vector3(0.0, 0.05, 0.0)
+	fogo.emitting = false
+	tween.tween_callback(func() -> void:
+		fogo.emitting = true
+		luz.light_color = Color(1.0, 0.55, 0.15)
+		luz.position = Vector3(0.0, 0.4, 0.3))
+	for i in 6:
+		tween.tween_property(luz, "light_energy", randf_range(2.5, 4.5), 0.12)
+	# Derrete: afunda e se espalha até virar uma poça; o fogo sobe junto.
+	tween.tween_property(alvo, "scale", Vector3(1.45, 0.04, 1.45), 1.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.parallel().tween_property(alvo, "rotation:x", rot_base.x, 0.6)
+	tween.parallel().tween_property(luz, "light_energy", 1.5, 1.8)
+	tween.tween_callback(func() -> void:
+		fogo.emitting = false
+		_fumaca(alvo, Vector3(0.0, 0.15, 0.0), Color(0.35, 0.35, 0.35)))
+	# A poça evapora.
+	tween.tween_property(alvo, "scale", Vector3(0.01, 0.01, 0.01), 0.5).set_ease(Tween.EASE_IN)
+	tween.parallel().tween_property(luz, "light_energy", 0.0, 0.5)
 	tween.tween_callback(func() -> void:
 		faiscas.queue_free()
+		fogo.queue_free()
 		luz.queue_free()
 		_esconder(alvo))
+
+
+## Labaredas laranja e vermelhas subindo do chão.
+func _chamas() -> CPUParticles3D:
+	var p := CPUParticles3D.new()
+	p.amount = 80
+	p.lifetime = 0.7
+	p.explosiveness = 0.0
+	p.mesh = _mesh_faisca(0.07)
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	p.emission_sphere_radius = 0.35
+	p.direction = Vector3.UP
+	p.spread = 20.0
+	p.initial_velocity_min = 1.2
+	p.initial_velocity_max = 2.4
+	p.gravity = Vector3(0.0, 1.5, 0.0)
+	p.scale_amount_min = 0.5
+	p.scale_amount_max = 1.6
+	p.scale_amount_curve = _curva_chama()
+	p.color = Color(1.0, 0.45, 0.08)
+	p.color_ramp = _rampa_fogo()
+	return p
+
+
+func _curva_chama() -> Curve:
+	var c := Curve.new()
+	c.add_point(Vector2(0.0, 1.0))
+	c.add_point(Vector2(0.5, 0.7))
+	c.add_point(Vector2(1.0, 0.0))
+	return c
+
+
+func _rampa_fogo() -> Gradient:
+	var g := Gradient.new()
+	g.set_color(0, Color(1.0, 0.85, 0.3))
+	g.set_color(1, Color(0.9, 0.15, 0.05, 0.0))
+	g.add_point(0.4, Color(1.0, 0.4, 0.05))
+	return g
 
 
 # -------------------------------------------------------------------- Utilidades

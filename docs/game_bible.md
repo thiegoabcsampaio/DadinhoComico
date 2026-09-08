@@ -159,6 +159,13 @@ com rastro verde; Ciborgue inclina para a camera com olho vermelho pulsando;
 Apresentadora sobe no feixe dourado da nave; Heroi pula e dispara onda de choque.
 Na derrota do jogador, o NPC vencedor faz o numero dele. Quando a eliminacao
 encerra a partida, o castigo do eliminado NAO roda (a celebracao tem prioridade).
+Em toda vitoria o vencedor levanta os bracos em V e balanca ate a cena recarregar
+(FestaModifier, SkeletonModifier3D por cima da animacao, como o OlharModifier).
+
+Castigo do Ciborgue (refeito): curto-circuito, depois raiva (cresce, avanca
+sobre a mesa, luz vermelha fixa, treme), grita "EU VOLTAREI!" (ciborgue.voltarei,
+balao via callback ao_gritar de PunishmentSystem.castigar) e derrete no fogo ate
+virar uma poca, que evapora em fumaca.
 
 Menu: cartoes com retrato (Assets/UI/Retratos, 256x256, render Workbench com
 fundo transparente), nome e frase; escolha do modo (Dadinho / Dados mentirosos,
